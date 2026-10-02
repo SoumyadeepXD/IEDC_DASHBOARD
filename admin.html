@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Portal — Manage Achievements</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg: #ffffff;
@@ -19,7 +22,13 @@
       --winner-bg: #fef3c7;
       --winner-text: #92400e;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
@@ -27,10 +36,12 @@
       line-height: 1.5;
       padding: 30px 20px;
     }
+
     .admin-container {
       max-width: 1000px;
       margin: 0 auto;
     }
+
     header {
       display: flex;
       align-items: center;
@@ -39,11 +50,13 @@
       padding-bottom: 16px;
       margin-bottom: 24px;
     }
+
     h1 {
       font-size: 1.6rem;
       font-weight: 800;
       letter-spacing: -0.02em;
     }
+
     .back-btn {
       text-decoration: none;
       font-size: 0.9rem;
@@ -55,8 +68,11 @@
       background: var(--card-bg);
       transition: background 0.15s;
     }
-    .back-btn:hover { background: #e5e7eb; }
-    
+
+    .back-btn:hover {
+      background: #e5e7eb;
+    }
+
     /* Login Box */
     .login-card {
       max-width: 440px;
@@ -65,16 +81,19 @@
       padding: 30px;
       border-radius: 8px;
       background: var(--card-bg);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
+
     .login-card h2 {
       font-size: 1.3rem;
       font-weight: 700;
       margin-bottom: 8px;
     }
+
     .form-group {
       margin-bottom: 16px;
     }
+
     label {
       display: block;
       font-size: 0.82rem;
@@ -84,7 +103,10 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    input, select, textarea {
+
+    input,
+    select,
+    textarea {
       width: 100%;
       padding: 10px 12px;
       font-size: 0.95rem;
@@ -94,10 +116,14 @@
       color: var(--text);
       font-family: inherit;
     }
-    input:focus, select:focus, textarea:focus {
+
+    input:focus,
+    select:focus,
+    textarea:focus {
       outline: none;
       border-color: var(--text);
     }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -110,36 +136,54 @@
       cursor: pointer;
       transition: all 0.15s;
     }
+
     .btn-dark {
       background: var(--text);
       color: #ffffff;
     }
-    .btn-dark:hover { background: #000000; }
+
+    .btn-dark:hover {
+      background: #000000;
+    }
+
     .btn-crimson {
       background: var(--crimson);
       color: #ffffff;
     }
-    .btn-crimson:hover { background: #991b1b; }
+
+    .btn-crimson:hover {
+      background: #991b1b;
+    }
+
     .btn-light {
       background: #ffffff;
       border: 1px solid var(--border);
       color: var(--text);
     }
-    .btn-light:hover { background: #f3f4f6; }
+
+    .btn-light:hover {
+      background: #f3f4f6;
+    }
+
     .btn-danger {
       background: #fee2e2;
       color: #b91c1c;
       border: 1px solid #fca5a5;
     }
-    .btn-danger:hover { background: #fca5a5; }
+
+    .btn-danger:hover {
+      background: #fca5a5;
+    }
 
     /* Admin Workspace */
     .admin-workspace {
       display: none;
     }
+
     .admin-workspace.active {
       display: block;
     }
+
     .action-bar {
       display: flex;
       justify-content: space-between;
@@ -148,18 +192,21 @@
       flex-wrap: wrap;
       gap: 12px;
     }
+
     .ach-table-wrap {
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow-x: auto;
       margin-bottom: 30px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
       font-size: 0.9rem;
     }
+
     th {
       background: var(--card-bg);
       padding: 12px 14px;
@@ -170,12 +217,17 @@
       font-size: 0.75rem;
       letter-spacing: 0.05em;
     }
+
     td {
       padding: 12px 14px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }
-    tr:last-child td { border-bottom: none; }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
     .badge {
       font-size: 0.75rem;
       font-weight: 700;
@@ -185,33 +237,57 @@
       color: var(--winner-text);
       display: inline-block;
     }
-    .badge-runner { background: #f1f5f9; color: #334155; }
-    .badge-bronze { background: #ffedd5; color: #9a3412; }
-    .badge-finalist { background: #f0fdf4; color: #166534; }
-    .badge-special { background: #faf5ff; color: #6b21a8; }
+
+    .badge-runner {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .badge-bronze {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .badge-finalist {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .badge-special {
+      background: #faf5ff;
+      color: #6b21a8;
+    }
 
     /* Modal */
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
       z-index: 100;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
-    .modal.active { display: flex; }
+
+    .modal.active {
+      display: flex;
+    }
+
     .modal-box {
       background: #ffffff;
       border-radius: 8px;
       max-width: 550px;
       width: 100%;
       padding: 26px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       max-height: 90vh;
       overflow-y: auto;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -220,6 +296,7 @@
       padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
     }
+
     .close-btn {
       background: none;
       border: none;
@@ -227,6 +304,7 @@
       cursor: pointer;
       color: var(--muted);
     }
+
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -234,16 +312,19 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="admin-container">
-    <header style="display:flex; align-items:center; justify-content:space-between; border-bottom: 2px solid var(--text); padding-bottom: 16px; margin-bottom: 24px; gap: 12px; flex-wrap: wrap;">
+    <header
+      style="display:flex; align-items:center; justify-content:space-between; border-bottom: 2px solid var(--text); padding-bottom: 16px; margin-bottom: 24px; gap: 12px; flex-wrap: wrap;">
       <div style="display:flex; align-items:center; gap: 14px;">
         <img src="assets/iem_logo.png" style="height: 52px;" alt="IEM Logo">
         <img src="assets/iedc_logo.png" style="height: 54px; width: 54px; border-radius: 50%;" alt="IEDC Logo">
         <div>
           <h1 style="font-size: 1.35rem; font-weight: 800;">IEDC CSE (AI &amp; ML) / CSE (AI)</h1>
-          <p style="font-size: 0.82rem; color: var(--muted); font-weight: 600;">Achievement Management Portal • IEM Kolkata</p>
+          <p style="font-size: 0.82rem; color: var(--muted); font-weight: 600;">Achievement Management Portal • IEM
+            Kolkata</p>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap: 14px;">
@@ -262,9 +343,7 @@
         <div class="form-group">
           <label for="pass-input">Admin Password</label>
           <input type="password" id="pass-input" placeholder="Enter password..." required autofocus>
-          <div style="font-size: 0.78rem; color: var(--dim); margin-top: 6px;">
-            Default static password: <strong style="color: var(--text);">admin123</strong>
-          </div>
+
         </div>
         <div id="auth-err" style="color: var(--crimson); font-size: 0.85rem; margin-bottom: 12px; display: none;">
           Incorrect password. Please try again.
@@ -380,12 +459,12 @@
           const json = await res.json();
           if (json.data) achievements = json.data;
         }
-      } catch(e) {}
+      } catch (e) { }
 
       if (!achievements.length) {
         const local = localStorage.getItem('achievements_data');
         if (local) {
-          try { achievements = JSON.parse(local); } catch(e){}
+          try { achievements = JSON.parse(local); } catch (e) { }
         }
         if (!achievements.length && typeof INITIAL_ACHIEVEMENTS !== 'undefined') {
           achievements = JSON.parse(JSON.stringify(INITIAL_ACHIEVEMENTS));
@@ -406,7 +485,7 @@
     function renderTable() {
       const tbody = document.getElementById('ach-tbody');
       // Sort by year desc
-      achievements.sort((a,b) => b.year - a.year);
+      achievements.sort((a, b) => b.year - a.year);
 
       tbody.innerHTML = achievements.map(item => `
         <tr>
@@ -455,7 +534,7 @@
     document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('active'));
     document.getElementById('btn-cancel').addEventListener('click', () => modal.classList.remove('active'));
 
-    window.editItem = function(id) {
+    window.editItem = function (id) {
       const item = achievements.find(a => a.id === id);
       if (!item) return;
       document.getElementById('f-id').value = item.id;
@@ -470,13 +549,13 @@
       modal.classList.add('active');
     };
 
-    window.deleteItem = async function(id) {
+    window.deleteItem = async function (id) {
       if (!confirm('Are you sure you want to delete this achievement?')) return;
       achievements = achievements.filter(a => a.id !== id);
       persist();
       try {
         await fetch('/api/achievements/' + encodeURIComponent(id), { method: 'DELETE' });
-      } catch(e){}
+      } catch (e) { }
       renderTable();
     };
 
@@ -513,7 +592,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-      } catch(e){}
+      } catch (e) { }
 
       modal.classList.remove('active');
       renderTable();
@@ -522,14 +601,14 @@
     function persist() {
       try {
         localStorage.setItem('achievements_data', JSON.stringify(achievements));
-      } catch(e){}
+      } catch (e) { }
     }
 
     document.getElementById('btn-export-json').addEventListener('click', () => {
       const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(achievements, null, 2));
       const a = document.createElement('a');
       a.href = dataStr;
-      a.download = `achievements_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.download = `achievements_backup_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
     });
 
@@ -544,4 +623,5 @@
     init();
   </script>
 </body>
+
 </html>

@@ -217,10 +217,10 @@ class TVPresentationEngine {
       'special': { cls: 'badge-track', label: item.badge || 'SPECIAL TRACK' }
     };
 
-    const badge = badgeTypes[item.awardTier] || { cls: 'badge-winner', label: item.badge || 'AWARD' };
+    const tierClass = `card-tier-${item.awardTier || 'winner'}`;
 
     return `
-      <article class="tv-card ${isHero ? 'tv-card-hero' : ''}">
+      <article class="tv-card ${isHero ? 'tv-card-hero' : ''} ${tierClass}">
         <div class="tv-card-header">
           <span class="tv-card-badge ${badge.cls}">${badge.label}</span>
           <span class="tv-card-category">${item.category || ''}</span>
