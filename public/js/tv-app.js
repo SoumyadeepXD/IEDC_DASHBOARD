@@ -1,6 +1,6 @@
 // =====================================================================
 // ACHIEVEDECK - AMBIENT TV DISPLAY SLIDESHOW ENGINE
-// Continuous Autoplay, TV Typography, Zero Touch Required
+// Continuous Autoplay, TV Typography, Zero Touch Required, Instant Render
 // =====================================================================
 
 class TVPresentationEngine {
@@ -16,42 +16,81 @@ class TVPresentationEngine {
     this.init();
   }
 
-  async init() {
-    await this.loadAchievements();
+  init() {
+    // 1. Immediately load data synchronously to guarantee 0ms render (never blank!)
+    this.loadInitialData();
+
+    // 2. Build and render slides right away
     this.buildSlides();
     this.renderSlides();
     this.renderHeaderDots();
+
+    // 3. Start ambient clock, autoplay loop, and input listeners
     this.startClock();
     this.startAutoplay();
     this.bindControls();
+
+    // 4. Asynchronously check for live updates in the background (non-blocking)
+    this.checkRemoteUpdates();
   }
 
-  async loadAchievements() {
-    // 1. Try API fetch
+  loadInitialData() {
+    let data = [];
+
+    // Priority 1: Check bundled data from data.js
+    if (typeof INITIAL_ACHIEVEMENTS !== 'undefined' && Array.isArray(INITIAL_ACHIEVEMENTS) && INITIAL_ACHIEVEMENTS.length > 0) {
+      data = JSON.parse(JSON.stringify(INITIAL_ACHIEVEMENTS));
+    } else if (typeof window !== 'undefined' && Array.isArray(window.INITIAL_ACHIEVEMENTS) && window.INITIAL_ACHIEVEMENTS.length > 0) {
+      data = JSON.parse(JSON.stringify(window.INITIAL_ACHIEVEMENTS));
+    }
+
+    // Priority 2: Use localStorage ONLY if it contains a non-empty array
     try {
-      const res = await fetch('/api/achievements');
+      if (typeof localStorage !== 'undefined') {
+        const local = localStorage.getItem('achievements_data');
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            data = parsed;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('localStorage read skipped:', e);
+    }
+
+    this.achievements = data;
+  }
+
+  async checkRemoteUpdates() {
+    // Only attempt fetch when served over http/https
+    if (typeof window === 'undefined') return;
+    if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+      const res = await fetch('/api/achievements', { signal: controller.signal });
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           this.achievements = json.data;
-          try { localStorage.setItem('achievements_data', JSON.stringify(this.achievements)); } catch(e){}
-          return;
+          try {
+            localStorage.setItem('achievements_data', JSON.stringify(this.achievements));
+          } catch (e) {}
+
+          const currentIdx = this.currentSlideIndex;
+          this.buildSlides();
+          this.renderSlides();
+          this.renderHeaderDots();
+          this.goToSlide(Math.min(currentIdx, this.slidesData.length - 1));
         }
       }
-    } catch (e) {}
-
-    // 2. Try localStorage
-    const local = localStorage.getItem('achievements_data');
-    if (local) {
-      try {
-        this.achievements = JSON.parse(local);
-        return;
-      } catch (e) {}
-    }
-
-    // 3. Fallback to bundled INITIAL_ACHIEVEMENTS from data.js
-    if (typeof INITIAL_ACHIEVEMENTS !== 'undefined') {
-      this.achievements = JSON.parse(JSON.stringify(INITIAL_ACHIEVEMENTS));
+    } catch (e) {
+      // Quiet fallback - offline or local static file
     }
   }
 
@@ -191,7 +230,7 @@ class TVPresentationEngine {
               <div class="tv-year-count-pill">
                 <span>${items.length}</span> Major Honors in ${year}
               </div>
-              <div style="font-size: clamp(0.95rem, 1.2vw, 1.25rem); color: var(--text-muted); margin-top: 4px;">
+              <div style="font-size: clamp(0.95rem, 1.15vw, 1.25rem); color: var(--text-muted); margin-top: 4px;">
                 ${winCount} 1st Place / Champion Trophies
               </div>
             </div>
@@ -217,6 +256,7 @@ class TVPresentationEngine {
       'special': { cls: 'badge-track', label: item.badge || 'SPECIAL TRACK' }
     };
 
+    const badge = badgeTypes[item.awardTier] || { cls: 'badge-winner', label: item.badge || 'AWARD' };
     const tierClass = `card-tier-${item.awardTier || 'winner'}`;
 
     return `
@@ -230,14 +270,13 @@ class TVPresentationEngine {
 
         <div class="tv-card-meta">
           ${item.organization ? `<strong>${item.organization}</strong>` : ''}
-          ${item.description && isHero ? `<p class="tv-card-detail" style="margin-top: 1vh; color: var(--text-secondary);">${item.description}</p>` : ''}
+          ${item.description && isHero ? `<p class="tv-card-detail" style="margin-top: 1.2vh; color: var(--text-secondary);">${item.description}</p>` : ''}
         </div>
       </article>
     `;
   }
 
   renderSummarySlideHtml(idx) {
-    const totalAll = this.achievements.length;
     const winners = this.achievements.filter(a => a.awardTier === 'winner').length;
     const runners = this.achievements.filter(a => a.awardTier === 'runner-up').length;
     const thirds = this.achievements.filter(a => a.awardTier === 'third-place').length;
@@ -251,7 +290,7 @@ class TVPresentationEngine {
             <h2 class="tv-summary-heading">All-Time Cumulative Podiums</h2>
             <div class="tv-summary-list">
               <div class="tv-summary-item">
-                <span class="tv-summary-item-label">🏆 1st Prize & Grand Champions</span>
+                <span class="tv-summary-item-label">🏆 1st Prize &amp; Grand Champions</span>
                 <span class="tv-summary-item-val">${winners}</span>
               </div>
               <div class="tv-summary-item">
@@ -267,7 +306,7 @@ class TVPresentationEngine {
                 <span class="tv-summary-item-val">${finalists}</span>
               </div>
               <div class="tv-summary-item">
-                <span class="tv-summary-item-label">🌟 Bounty & Special Track Wins</span>
+                <span class="tv-summary-item-label">🌟 Bounty &amp; Special Track Wins</span>
                 <span class="tv-summary-item-val">${specials}</span>
               </div>
             </div>
@@ -284,7 +323,7 @@ class TVPresentationEngine {
                 <p>1st Place Winner solving critical space technology and satellite problem statements with ISRO.</p>
               </div>
               <div class="tv-spotlight-item">
-                <h4>🎓 Premier Institutes (IIT BHU & IIT Kharagpur)</h4>
+                <h4>🎓 Premier Institutes (IIT BHU &amp; IIT Kharagpur)</h4>
                 <p>Grand Winner at IIT-BHU Innovation Expo 2026 and 2nd Runner-Up in the IIT Kharagpur B-Plan Competition.</p>
               </div>
               <div class="tv-spotlight-item">
@@ -304,20 +343,23 @@ class TVPresentationEngine {
     const slides = document.querySelectorAll('.tv-slide');
     const dots = document.querySelectorAll('.tv-dot');
 
-    if (slides[this.currentSlideIndex]) {
-      slides[this.currentSlideIndex].classList.remove('active');
-      slides[this.currentSlideIndex].classList.add('slide-out');
+    const prevIndex = this.currentSlideIndex;
+    const prevSlide = slides[prevIndex];
+    const nextSlide = slides[index];
+
+    if (prevSlide && prevIndex !== index) {
+      prevSlide.classList.remove('active');
+      prevSlide.classList.add('slide-out');
       setTimeout(() => {
-        if (slides[this.currentSlideIndex]) {
-          slides[this.currentSlideIndex].classList.remove('slide-out');
-        }
-      }, 600);
+        prevSlide.classList.remove('slide-out');
+      }, 650);
     }
 
     this.currentSlideIndex = index;
 
-    if (slides[this.currentSlideIndex]) {
-      slides[this.currentSlideIndex].classList.add('active');
+    if (nextSlide) {
+      nextSlide.classList.remove('slide-out');
+      nextSlide.classList.add('active');
     }
 
     dots.forEach((dot, idx) => {
@@ -383,7 +425,7 @@ class TVPresentationEngine {
   }
 
   bindControls() {
-    // Keyboard navigation for wireless clicker or remote
+    // Keyboard navigation for wireless clicker or TV remote
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowRight':
@@ -412,7 +454,7 @@ class TVPresentationEngine {
       }
     });
 
-    // Tap/Click on dots to jump
+    // Tap/Click on dots to jump directly
     document.querySelectorAll('.tv-dot').forEach(dot => {
       dot.addEventListener('click', () => {
         const idx = parseInt(dot.getAttribute('data-index'), 10);
@@ -422,6 +464,15 @@ class TVPresentationEngine {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  window.tvEngine = new TVPresentationEngine();
-});
+// Immediate and robust launcher (works even if DOMContentLoaded already fired)
+function launchTvPresentation() {
+  if (!window.tvEngine) {
+    window.tvEngine = new TVPresentationEngine();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', launchTvPresentation);
+} else {
+  launchTvPresentation();
+}

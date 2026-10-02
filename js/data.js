@@ -289,6 +289,10 @@ const INITIAL_ACHIEVEMENTS = [
   }
 ];
 
+if (typeof window !== 'undefined') {
+  window.INITIAL_ACHIEVEMENTS = INITIAL_ACHIEVEMENTS;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { INITIAL_ACHIEVEMENTS };
 }

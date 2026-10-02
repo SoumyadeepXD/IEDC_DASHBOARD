@@ -247,16 +247,18 @@ html, body {
   pointer-events: none;
 }
 
-.tv-slide.active {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
 .tv-slide.slide-out {
   opacity: 0;
+  visibility: hidden;
   transform: translateX(-40px);
+  pointer-events: none;
+}
+
+.tv-slide.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(0) !important;
+  pointer-events: auto !important;
 }
 
 /* =====================================================================
