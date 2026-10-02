@@ -77,7 +77,7 @@ To add, edit, or delete achievements without touching the main TV screen, open:
 ```
 http://localhost:3000/admin.html
 ```
-- **Static Admin Password**: `admin123`
+
 - Add achievements for any existing or new year.
 - Changes are instantly saved and reflected on the TV slideshow.
 - Export or Reset data anytime.
