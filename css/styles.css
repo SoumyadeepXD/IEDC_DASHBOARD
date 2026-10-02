@@ -60,13 +60,16 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -131,8 +134,8 @@ html, body {
 }
 
 .iem-logo {
-  height: 70px;
-  max-width: 160px;
+  height: 75px;
+  max-width: 165px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
@@ -145,8 +148,8 @@ html, body {
 }
 
 .uem-logo {
-  height: 70px;
-  max-width: 160px;
+  height: 65px;
+  max-width: 150px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
@@ -334,12 +337,15 @@ html, body {
 .tv-stat-block:nth-child(1) {
   border-top: 5px solid var(--crimson-accent);
 }
+
 .tv-stat-block:nth-child(2) {
   border-top: 5px solid var(--award-winner-accent);
 }
+
 .tv-stat-block:nth-child(3) {
   border-top: 5px solid var(--award-runner-accent);
 }
+
 .tv-stat-block:nth-child(4) {
   border-top: 5px solid var(--award-bronze-accent);
 }
@@ -470,6 +476,7 @@ html, body {
   grid-template-columns: 1fr;
   max-width: 960px;
 }
+
 .tv-cards-grid.grid-many {
   grid-template-columns: 1fr 1fr;
 }
@@ -665,12 +672,29 @@ html, body {
   box-shadow: var(--shadow-sm);
 }
 
-.tv-summary-item:nth-child(1) { border-left-color: var(--crimson-accent); }
-.tv-summary-item:nth-child(2) { border-left-color: var(--award-winner-accent); }
-.tv-summary-item:nth-child(3) { border-left-color: var(--award-runner-accent); }
-.tv-summary-item:nth-child(4) { border-left-color: var(--award-bronze-accent); }
-.tv-summary-item:nth-child(5) { border-left-color: var(--award-finalist-accent); }
-.tv-summary-item:nth-child(6) { border-left-color: var(--award-track-accent); }
+.tv-summary-item:nth-child(1) {
+  border-left-color: var(--crimson-accent);
+}
+
+.tv-summary-item:nth-child(2) {
+  border-left-color: var(--award-winner-accent);
+}
+
+.tv-summary-item:nth-child(3) {
+  border-left-color: var(--award-runner-accent);
+}
+
+.tv-summary-item:nth-child(4) {
+  border-left-color: var(--award-bronze-accent);
+}
+
+.tv-summary-item:nth-child(5) {
+  border-left-color: var(--award-finalist-accent);
+}
+
+.tv-summary-item:nth-child(6) {
+  border-left-color: var(--award-track-accent);
+}
 
 .tv-summary-item-label {
   font-size: clamp(1.1rem, 1.45vw, 1.65rem);
@@ -701,6 +725,7 @@ html, body {
   padding-bottom: 1.8vh;
   border-bottom: 1px solid var(--border-hairline);
 }
+
 .tv-spotlight-item:last-child {
   padding-bottom: 0;
   border-bottom: none;
