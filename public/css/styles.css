@@ -1,0 +1,627 @@
+/* =====================================================================
+   ACHIEVEDECK - TV / KIOSK SLIDESHOW DISPLAY
+   Minimalist, Muted Palette, Pure White Background, TV-Scale Typography
+   ===================================================================== */
+
+:root {
+  --bg-tv: #ffffff;
+  --bg-surface: #f9fafb;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f3f4f6;
+
+  /* Typography Colors */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+
+  /* Whiteboard Muted Crimson Accent */
+  --crimson-accent: #b91c1c;
+  --crimson-light: #fef2f2;
+  --crimson-border: #fca5a5;
+
+  /* Muted Award Tones (Soft, dignified, academic) */
+  --award-winner-bg: #fef3c7;
+  --award-winner-text: #92400e;
+  --award-winner-border: #fde68a;
+
+  --award-runner-bg: #f1f5f9;
+  --award-runner-text: #334155;
+  --award-runner-border: #cbd5e1;
+
+  --award-bronze-bg: #ffedd5;
+  --award-bronze-text: #9a3412;
+  --award-bronze-border: #fed7aa;
+
+  --award-finalist-bg: #f0fdf4;
+  --award-finalist-text: #166534;
+  --award-finalist-border: #bbf7d0;
+
+  --award-track-bg: #faf5ff;
+  --award-track-text: #6b21a8;
+  --award-track-border: #e9d5ff;
+
+  --border-hairline: #e5e7eb;
+  --border-strong: #d1d5db;
+
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-tv);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* =====================================================================
+   TOP TV HEADER BAR WITH TRI-BRANDING (IEM - IEDC - UEM)
+   ===================================================================== */
+.tv-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 104px;
+  padding: 0 2.5vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-tv);
+  border-bottom: 1px solid var(--border-hairline);
+  z-index: 50;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.tv-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.tv-header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 2;
+}
+
+.tv-header-right {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.branding-logo {
+  object-fit: contain;
+  display: block;
+}
+
+.iem-logo {
+  height: 72px;
+  max-width: 160px;
+}
+
+.iedc-logo {
+  height: 76px;
+  width: 76px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.uem-logo {
+  height: 72px;
+  max-width: 160px;
+}
+
+.tv-header-titles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.header-main-title {
+  font-size: clamp(1.2rem, 1.8vw, 2.1rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.header-sub-title {
+  font-size: clamp(0.7rem, 0.85vw, 0.95rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--crimson-accent);
+  margin-top: 2px;
+}
+
+.tv-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* Slide Indicator Dots */
+.tv-dots-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tv-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border-hairline);
+  border: 1px solid var(--border-strong);
+  transition: all 0.3s ease;
+}
+
+.tv-dot.active {
+  width: 24px;
+  border-radius: 6px;
+  background: var(--crimson-accent);
+  border-color: var(--crimson-accent);
+}
+
+.tv-clock {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* =====================================================================
+   MAIN SLIDES CONTAINER (FULLSCREEN TV STAGE)
+   ===================================================================== */
+.tv-stage {
+  position: absolute;
+  top: 104px;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: calc(100vh - 112px);
+}
+
+.tv-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 3vh 4vw 4vh 4vw;
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(40px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+  pointer-events: none;
+}
+
+.tv-slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.tv-slide.slide-out {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+/* =====================================================================
+   SLIDE 0: COVER / TITLE POSTER
+   ===================================================================== */
+.tv-cover-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.tv-cover-tag {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--crimson-accent);
+  margin-bottom: 2vh;
+}
+
+.tv-cover-headline {
+  font-size: clamp(3.2rem, 5.5vw, 6.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 3vh;
+}
+
+.tv-cover-desc {
+  font-size: clamp(1.4rem, 2vw, 2.2rem);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  max-width: 1100px;
+  margin-bottom: 5vh;
+}
+
+.tv-cover-stats {
+  display: flex;
+  gap: 3vw;
+  width: 100%;
+  max-width: 1200px;
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 4vh;
+}
+
+.tv-stat-block {
+  flex: 1;
+}
+
+.tv-stat-num {
+  font-size: clamp(2.8rem, 4.5vw, 5rem);
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 1vh;
+}
+
+.tv-stat-num.crimson {
+  color: var(--crimson-accent);
+}
+
+.tv-stat-lbl {
+  font-size: clamp(1rem, 1.3vw, 1.35rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =====================================================================
+   YEAR SLIDE LAYOUT (SPLIT SCREEN FOR TV)
+   ===================================================================== */
+.tv-year-split {
+  display: grid;
+  grid-template-columns: 28% 72%;
+  gap: 3.5vw;
+  width: 100%;
+  height: 100%;
+  align-items: stretch;
+}
+
+/* Left Hero Year Column */
+.tv-year-aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--border-hairline);
+  padding-right: 2.5vw;
+}
+
+.tv-year-num {
+  font-size: clamp(5.5rem, 9.5vw, 10.5rem);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  color: var(--crimson-accent);
+  font-family: var(--font-mono);
+  margin-bottom: 2vh;
+}
+
+.tv-year-tagline {
+  font-size: clamp(1.3rem, 1.8vw, 2rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-primary);
+  margin-bottom: 1.5vh;
+}
+
+.tv-year-summary {
+  font-size: clamp(1rem, 1.3vw, 1.35rem);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.tv-year-meta-box {
+  margin-top: auto;
+  padding-top: 3vh;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.tv-year-count-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(1.1rem, 1.4vw, 1.5rem);
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.tv-year-count-pill span {
+  color: var(--crimson-accent);
+}
+
+/* Right Achievements Grid Column */
+.tv-achievements-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+.tv-cards-grid {
+  display: grid;
+  gap: 1.6vh 1.6vw;
+  width: 100%;
+}
+
+/* Grid layout variations depending on count */
+.tv-cards-grid.grid-1 {
+  grid-template-columns: 1fr;
+  max-width: 900px;
+}
+.tv-cards-grid.grid-many {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Individual Achievement Card */
+.tv-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
+  padding: 2vh 1.6vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease;
+}
+
+/* Single featured card (e.g. 2023 SIH Winner) */
+.tv-card.tv-card-hero {
+  padding: 4vh 3vw;
+  border-left: 6px solid var(--crimson-accent);
+}
+
+.tv-card.tv-card-hero .tv-card-title {
+  font-size: clamp(2rem, 3.2vw, 3.5rem);
+  margin-bottom: 2vh;
+}
+
+.tv-card.tv-card-hero .tv-card-detail {
+  font-size: clamp(1.3rem, 1.8vw, 2rem);
+  line-height: 1.5;
+}
+
+/* Card Header */
+.tv-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8vh;
+  gap: 10px;
+}
+
+.tv-card-badge {
+  display: inline-block;
+  font-size: clamp(0.75rem, 0.95vw, 1.05rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.badge-winner {
+  background: var(--award-winner-bg);
+  color: var(--award-winner-text);
+  border: 1px solid var(--award-winner-border);
+}
+
+.badge-runner {
+  background: var(--award-runner-bg);
+  color: var(--award-runner-text);
+  border: 1px solid var(--award-runner-border);
+}
+
+.badge-bronze {
+  background: var(--award-bronze-bg);
+  color: var(--award-bronze-text);
+  border: 1px solid var(--award-bronze-border);
+}
+
+.badge-finalist {
+  background: var(--award-finalist-bg);
+  color: var(--award-finalist-text);
+  border: 1px solid var(--award-finalist-border);
+}
+
+.badge-track {
+  background: var(--award-track-bg);
+  color: var(--award-track-text);
+  border: 1px solid var(--award-track-border);
+}
+
+.tv-card-category {
+  font-size: clamp(0.75rem, 0.9vw, 0.95rem);
+  font-weight: 600;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-card-title {
+  font-size: clamp(1.15rem, 1.6vw, 1.85rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 0.5vh;
+  letter-spacing: -0.01em;
+}
+
+.tv-card-meta {
+  font-size: clamp(0.85rem, 1.05vw, 1.15rem);
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* =====================================================================
+   SLIDE: ALL-TIME SUMMARY & HIGHLIGHTS
+   ===================================================================== */
+.tv-summary-split {
+  display: grid;
+  grid-template-columns: 48% 48%;
+  gap: 4vw;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+}
+
+.tv-summary-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tv-summary-heading {
+  font-size: clamp(2rem, 3.5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin-bottom: 2vh;
+  letter-spacing: -0.02em;
+}
+
+.tv-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8vh;
+}
+
+.tv-summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6vh 1.6vw;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  border-radius: 6px;
+}
+
+.tv-summary-item-label {
+  font-size: clamp(1.1rem, 1.5vw, 1.7rem);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tv-summary-item-val {
+  font-size: clamp(1.3rem, 1.8vw, 2.2rem);
+  font-weight: 900;
+  font-family: var(--font-mono);
+  color: var(--crimson-accent);
+}
+
+.tv-spotlight-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hairline);
+  border-left: 6px solid var(--crimson-accent);
+  border-radius: 8px;
+  padding: 3vh 2.5vw;
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+}
+
+.tv-spotlight-item h4 {
+  font-size: clamp(1.2rem, 1.6vw, 1.85rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.5vh;
+}
+
+.tv-spotlight-item p {
+  font-size: clamp(0.95rem, 1.2vw, 1.35rem);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* =====================================================================
+   BOTTOM AUTOPLAY PROGRESS LINE
+   ===================================================================== */
+.tv-progress-line {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--border-hairline);
+  z-index: 90;
+}
+
+.tv-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--crimson-accent);
+  transition: width 0.1s linear;
+}
+
+/* Unobtrusive Admin shortcut trigger (discreet in bottom corner) */
+.tv-admin-corner {
+  position: fixed;
+  bottom: 12px;
+  right: 14px;
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+  z-index: 100;
+}
+
+.tv-admin-corner:hover {
+  opacity: 1;
+}
+
+.tv-admin-link {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 3px 8px;
+  border-radius: 4px;
+}

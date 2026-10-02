@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — Manage Achievements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --card-bg: #f9fafb;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #4b5563;
+      --dim: #9ca3af;
+      --crimson: #b91c1c;
+      --winner-bg: #fef3c7;
+      --winner-text: #92400e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 30px 20px;
+    }
+    .admin-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--text);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .back-btn {
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 6px;
+      background: var(--card-bg);
+      transition: background 0.15s;
+    }
+    .back-btn:hover { background: #e5e7eb; }
+    
+    /* Login Box */
+    .login-card {
+      max-width: 440px;
+      margin: 60px auto;
+      border: 1px solid var(--border);
+      padding: 30px;
+      border-radius: 8px;
+      background: var(--card-bg);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .login-card h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--text);
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--text);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-dark {
+      background: var(--text);
+      color: #ffffff;
+    }
+    .btn-dark:hover { background: #000000; }
+    .btn-crimson {
+      background: var(--crimson);
+      color: #ffffff;
+    }
+    .btn-crimson:hover { background: #991b1b; }
+    .btn-light {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-light:hover { background: #f3f4f6; }
+    .btn-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+    }
+    .btn-danger:hover { background: #fca5a5; }
+
+    /* Admin Workspace */
+    .admin-workspace {
+      display: none;
+    }
+    .admin-workspace.active {
+      display: block;
+    }
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .ach-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      background: var(--card-bg);
+      padding: 12px 14px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--winner-bg);
+      color: var(--winner-text);
+      display: inline-block;
+    }
+    .badge-runner { background: #f1f5f9; color: #334155; }
+    .badge-bronze { background: #ffedd5; color: #9a3412; }
+    .badge-finalist { background: #f0fdf4; color: #166534; }
+    .badge-special { background: #faf5ff; color: #6b21a8; }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal.active { display: flex; }
+    .modal-box {
+      background: #ffffff;
+      border-radius: 8px;
+      max-width: 550px;
+      width: 100%;
+      padding: 26px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-container">
+    <header style="display:flex; align-items:center; justify-content:space-between; border-bottom: 2px solid var(--text); padding-bottom: 16px; margin-bottom: 24px; gap: 12px; flex-wrap: wrap;">
+      <div style="display:flex; align-items:center; gap: 14px;">
+        <img src="assets/iem_logo.png" style="height: 52px;" alt="IEM Logo">
+        <img src="assets/iedc_logo.png" style="height: 54px; width: 54px; border-radius: 50%;" alt="IEDC Logo">
+        <div>
+          <h1 style="font-size: 1.35rem; font-weight: 800;">IEDC CSE (AI &amp; ML) / CSE (AI)</h1>
+          <p style="font-size: 0.82rem; color: var(--muted); font-weight: 600;">Achievement Management Portal • IEM Kolkata</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap: 14px;">
+        <a href="index.html" class="back-btn">📺 Open TV Slideshow</a>
+        <img src="assets/uem_logo.png" style="height: 52px;" alt="UEM Logo">
+      </div>
+    </header>
+
+    <!-- Login Panel -->
+    <div class="login-card" id="login-panel">
+      <h2>Admin Authentication</h2>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 16px;">
+        Please enter the static administrator password.
+      </p>
+      <form id="auth-form">
+        <div class="form-group">
+          <label for="pass-input">Admin Password</label>
+          <input type="password" id="pass-input" placeholder="Enter password..." required autofocus>
+          <div style="font-size: 0.78rem; color: var(--dim); margin-top: 6px;">
+            Default static password: <strong style="color: var(--text);">admin123</strong>
+          </div>
+        </div>
+        <div id="auth-err" style="color: var(--crimson); font-size: 0.85rem; margin-bottom: 12px; display: none;">
+          Incorrect password. Please try again.
+        </div>
+        <button type="submit" class="btn btn-dark" style="width: 100%;">Unlock Admin Mode</button>
+      </form>
+    </div>
+
+    <!-- Admin Workspace (Shown after auth) -->
+    <div class="admin-workspace" id="admin-workspace">
+      <div class="action-bar">
+        <div>
+          <button class="btn btn-crimson" id="btn-add-ach">+ Add New Achievement</button>
+          <button class="btn btn-light" id="btn-export-json">📥 Export Backup</button>
+          <button class="btn btn-light" id="btn-reset-db">🔄 Reset to Whiteboard</button>
+        </div>
+        <div>
+          <button class="btn btn-light" id="btn-logout">Log Out</button>
+        </div>
+      </div>
+
+      <div class="ach-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 80px;">Year</th>
+              <th>Competition / Event Title</th>
+              <th>Award</th>
+              <th>Category</th>
+              <th>Host Org</th>
+              <th style="width: 140px; text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ach-tbody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal" id="ach-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title">Add Achievement</h3>
+        <button class="close-btn" id="modal-close">&times;</button>
+      </div>
+      <form id="ach-form">
+        <input type="hidden" id="f-id">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="f-year">Year</label>
+            <input type="number" id="f-year" required placeholder="e.g. 2026">
+          </div>
+          <div class="form-group">
+            <label for="f-tier">Award Tier</label>
+            <select id="f-tier">
+              <option value="winner">Winner / 1st Place</option>
+              <option value="runner-up">2nd Place / Runner Up</option>
+              <option value="third-place">3rd Place / 2nd Runner Up</option>
+              <option value="finalist">National Finalist</option>
+              <option value="special">Bounty / Special Track</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-title">Competition Title</label>
+          <input type="text" id="f-title" required placeholder="e.g. ISRO Space Hackathon">
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="f-badge">Badge Label</label>
+            <input type="text" id="f-badge" placeholder="e.g. 🏆 Winner, 🥈 2nd Place">
+          </div>
+          <div class="form-group">
+            <label for="f-category">Category</label>
+            <input type="text" id="f-category" placeholder="e.g. Space Tech, AI, B-Plan">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="f-org">Organizing Body / Institute</label>
+          <input type="text" id="f-org" placeholder="e.g. ISRO, IIT BHU, AICTE">
+        </div>
+
+        <div class="form-group">
+          <label for="f-desc">Description / Notes</label>
+          <textarea id="f-desc" rows="3" placeholder="Brief note about the achievement..."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+          <button type="button" class="btn btn-light" id="btn-cancel">Cancel</button>
+          <button type="submit" class="btn btn-dark">Save Achievement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    let achievements = [];
+    const STATIC_PASS = 'admin123';
+    let isAuthed = sessionStorage.getItem('admin_ok') === 'true';
+
+    async function init() {
+      // Load data
+      try {
+        const res = await fetch('/api/achievements');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data) achievements = json.data;
+        }
+      } catch(e) {}
+
+      if (!achievements.length) {
+        const local = localStorage.getItem('achievements_data');
+        if (local) {
+          try { achievements = JSON.parse(local); } catch(e){}
+        }
+        if (!achievements.length && typeof INITIAL_ACHIEVEMENTS !== 'undefined') {
+          achievements = JSON.parse(JSON.stringify(INITIAL_ACHIEVEMENTS));
+        }
+      }
+
+      if (isAuthed) {
+        showWorkspace();
+      }
+    }
+
+    function showWorkspace() {
+      document.getElementById('login-panel').style.display = 'none';
+      document.getElementById('admin-workspace').classList.add('active');
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('ach-tbody');
+      // Sort by year desc
+      achievements.sort((a,b) => b.year - a.year);
+
+      tbody.innerHTML = achievements.map(item => `
+        <tr>
+          <td><strong style="color: var(--crimson); font-family: monospace; font-size: 1rem;">${item.year}</strong></td>
+          <td><strong>${item.title}</strong></td>
+          <td><span class="badge badge-${item.awardTier}">${item.badge || item.position}</span></td>
+          <td><span style="color: var(--muted);">${item.category || '-'}</span></td>
+          <td><span style="color: var(--muted);">${item.organization || '-'}</span></td>
+          <td style="text-align: right;">
+            <button class="btn btn-light" style="padding: 4px 8px; font-size: 0.78rem;" onclick="editItem('${item.id}')">Edit</button>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.78rem;" onclick="deleteItem('${item.id}')">Del</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Auth
+    document.getElementById('auth-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pass = document.getElementById('pass-input').value;
+      if (pass === STATIC_PASS) {
+        sessionStorage.setItem('admin_ok', 'true');
+        isAuthed = true;
+        showWorkspace();
+      } else {
+        document.getElementById('auth-err').style.display = 'block';
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      sessionStorage.removeItem('admin_ok');
+      window.location.reload();
+    });
+
+    // Add / Edit
+    const modal = document.getElementById('ach-modal');
+    document.getElementById('btn-add-ach').addEventListener('click', () => {
+      document.getElementById('ach-form').reset();
+      document.getElementById('f-id').value = '';
+      document.getElementById('modal-title').textContent = 'Add Achievement';
+      document.getElementById('f-year').value = 2026;
+      document.getElementById('f-badge').value = '🏆 Winner';
+      modal.classList.add('active');
+    });
+
+    document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('active'));
+    document.getElementById('btn-cancel').addEventListener('click', () => modal.classList.remove('active'));
+
+    window.editItem = function(id) {
+      const item = achievements.find(a => a.id === id);
+      if (!item) return;
+      document.getElementById('f-id').value = item.id;
+      document.getElementById('f-year').value = item.year;
+      document.getElementById('f-title').value = item.title;
+      document.getElementById('f-tier').value = item.awardTier || 'winner';
+      document.getElementById('f-badge').value = item.badge || '';
+      document.getElementById('f-category').value = item.category || '';
+      document.getElementById('f-org').value = item.organization || '';
+      document.getElementById('f-desc').value = item.description || '';
+      document.getElementById('modal-title').textContent = 'Edit Achievement';
+      modal.classList.add('active');
+    };
+
+    window.deleteItem = async function(id) {
+      if (!confirm('Are you sure you want to delete this achievement?')) return;
+      achievements = achievements.filter(a => a.id !== id);
+      persist();
+      try {
+        await fetch('/api/achievements/' + encodeURIComponent(id), { method: 'DELETE' });
+      } catch(e){}
+      renderTable();
+    };
+
+    document.getElementById('ach-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('f-id').value;
+      const year = parseInt(document.getElementById('f-year').value, 10);
+      const title = document.getElementById('f-title').value.trim();
+
+      const payload = {
+        id: id || `ach-${year}-${Date.now().toString(36)}`,
+        year,
+        title,
+        awardTier: document.getElementById('f-tier').value,
+        badge: document.getElementById('f-badge').value.trim() || '🏆 Winner',
+        category: document.getElementById('f-category').value.trim(),
+        organization: document.getElementById('f-org').value.trim(),
+        description: document.getElementById('f-desc').value.trim()
+      };
+
+      if (id) {
+        const idx = achievements.findIndex(a => a.id === id);
+        if (idx !== -1) achievements[idx] = payload;
+      } else {
+        achievements.unshift(payload);
+      }
+
+      persist();
+      try {
+        const url = id ? `/api/achievements/${encodeURIComponent(id)}` : '/api/achievements';
+        const method = id ? 'PUT' : 'POST';
+        await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch(e){}
+
+      modal.classList.remove('active');
+      renderTable();
+    });
+
+    function persist() {
+      try {
+        localStorage.setItem('achievements_data', JSON.stringify(achievements));
+      } catch(e){}
+    }
+
+    document.getElementById('btn-export-json').addEventListener('click', () => {
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(achievements, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = `achievements_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+    });
+
+    document.getElementById('btn-reset-db').addEventListener('click', () => {
+      if (!confirm('Reset all achievements to original whiteboard data?')) return;
+      achievements = JSON.parse(JSON.stringify(INITIAL_ACHIEVEMENTS));
+      persist();
+      renderTable();
+      alert('Reset completed.');
+    });
+
+    init();
+  </script>
+</body>
+</html>
