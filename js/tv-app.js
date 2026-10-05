@@ -12,11 +12,15 @@ class TVPresentationEngine {
     this.isPaused = false;
     this.progressInterval = null;
     this.progressElapsed = 0;
+    this.currentTheme = 'light';
 
     this.init();
   }
 
   init() {
+    // 0. Initialize theme (Night Mode / Day Mode)
+    this.initTheme();
+
     // 1. Immediately load data synchronously to guarantee 0ms render (never blank!)
     this.loadInitialData();
 
@@ -32,6 +36,52 @@ class TVPresentationEngine {
 
     // 4. Asynchronously check for live updates in the background (non-blocking)
     this.checkRemoteUpdates();
+  }
+
+  initTheme() {
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem('theme');
+    } catch (e) {}
+
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
+
+    this.setTheme(initialTheme);
+
+    const toggleBtn = document.getElementById('tv-theme-toggle');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => this.toggleTheme());
+    }
+  }
+
+  setTheme(theme) {
+    this.currentTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {}
+
+    const toggleBtn = document.getElementById('tv-theme-toggle');
+    if (toggleBtn) {
+      toggleBtn.setAttribute('aria-pressed', theme === 'dark');
+      const label = toggleBtn.querySelector('.theme-toggle-label');
+      if (label) {
+        label.textContent = theme === 'dark' ? 'Day' : 'Night';
+      }
+      toggleBtn.setAttribute('title', theme === 'dark' ? 'Switch to Day Mode (Press N)' : 'Switch to Night Mode (Press N)');
+    }
+  }
+
+  toggleTheme() {
+    const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+    this.setTheme(newTheme);
   }
 
   loadInitialData() {
@@ -450,6 +500,10 @@ class TVPresentationEngine {
         case 'm':
         case 'M':
           window.location.href = 'admin.html';
+          break;
+        case 'n':
+        case 'N':
+          this.toggleTheme();
           break;
       }
     });

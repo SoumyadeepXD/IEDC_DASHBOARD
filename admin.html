@@ -310,6 +310,68 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
+
+    /* Night Mode / Dark Theme for Admin */
+    [data-theme="dark"],
+    body.dark-mode {
+      --bg: #090d16;
+      --card-bg: #131c2e;
+      --border: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --dim: #64748b;
+      --crimson: #f87171;
+      --winner-bg: rgba(245, 158, 11, 0.16);
+      --winner-text: #fbbf24;
+    }
+
+    [data-theme="dark"] header {
+      border-bottom-color: #334155 !important;
+    }
+
+    [data-theme="dark"] input,
+    [data-theme="dark"] select,
+    [data-theme="dark"] textarea {
+      background: #0f172a;
+      color: #f8fafc;
+      border-color: #334155;
+    }
+
+    [data-theme="dark"] .modal-box {
+      background: #131c2e;
+      border: 1px solid #1e293b;
+    }
+
+    [data-theme="dark"] .back-btn,
+    [data-theme="dark"] .btn-light {
+      background: #1e293b;
+      color: #f8fafc;
+      border-color: #334155;
+    }
+
+    [data-theme="dark"] .back-btn:hover,
+    [data-theme="dark"] .btn-light:hover {
+      background: #334155;
+    }
+
+    [data-theme="dark"] .btn-dark {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    [data-theme="dark"] .btn-dark:hover {
+      background: #e2e8f0;
+    }
+
+    [data-theme="dark"] .btn-danger {
+      background: rgba(185, 28, 28, 0.2);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    [data-theme="dark"] .btn-danger:hover {
+      background: rgba(185, 28, 28, 0.4);
+    }
   </style>
 </head>
 
@@ -328,6 +390,7 @@
         </div>
       </div>
       <div style="display:flex; align-items:center; gap: 14px;">
+        <button id="admin-theme-btn" class="btn btn-light" style="padding: 8px 12px; font-size: 0.85rem;" title="Toggle Night Mode (Press N)">🌙 Night</button>
         <a href="index.html" class="back-btn">📺 Open TV Slideshow</a>
         <img src="assets/uem_logo.png" style="height: 52px;" alt="UEM Logo">
       </div>
@@ -450,8 +513,45 @@
     let achievements = [];
     const STATIC_PASS = 'admin123';
     let isAuthed = sessionStorage.getItem('admin_ok') === 'true';
+    let currentTheme = 'light';
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      currentTheme = saved ? saved : (prefersDark ? 'dark' : 'light');
+      applyTheme(currentTheme);
+
+      const btn = document.getElementById('admin-theme-btn');
+      if (btn) {
+        btn.addEventListener('click', toggleTheme);
+      }
+      window.addEventListener('keydown', (e) => {
+        if ((e.key === 'n' || e.key === 'N') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+          toggleTheme();
+        }
+      });
+    }
+
+    function applyTheme(theme) {
+      currentTheme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') document.body.classList.add('dark-mode');
+      else document.body.classList.remove('dark-mode');
+      try { localStorage.setItem('theme', theme); } catch (e) {}
+
+      const btn = document.getElementById('admin-theme-btn');
+      if (btn) {
+        btn.textContent = theme === 'dark' ? '☀️ Day' : '🌙 Night';
+      }
+    }
+
+    function toggleTheme() {
+      applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    }
 
     async function init() {
+      initTheme();
+
       // Load data
       try {
         const res = await fetch('/api/achievements');
