@@ -3,12 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>IEDC CSE(AI&ML)/CSE(AI) - Hall of Fame</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IEDC CSE (AI &amp; ML) / CSE (AI) — Hall of Fame</title>
   <meta name="description"
-    content="Minimalist ambient TV display slideshow showcasing year-wise competitive achievements and hackathon championships.">
+    content="Cinematic Apple-keynote ambient TV display for IEDC CSE (AI & ML) / CSE (AI), IEM Kolkata.">
 
-  <!-- Inter Font -->
+  <!-- Inter Font Preload -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -22,80 +22,49 @@
 
 <body>
 
-  <!-- Top TV Header with Tri-Branding (IEM on left, IEDC in center, UEM on right) -->
-  <header class="tv-header">
-    <!-- Top Left: IEM Logo -->
-    <div class="tv-header-left">
-      <img src="assets/iem_logo.png" alt="IEM - Institute of Engineering & Management" class="branding-logo iem-logo">
-    </div>
-
-    <!-- Top Center: IEDC Logo & Improvised Department Title -->
-    <div class="tv-header-center">
-      <img src="assets/iedc_logo.png" alt="IEDC - Innovation & Entrepreneurship Development Centre"
-        class="branding-logo iedc-logo">
-      <div class="tv-header-titles">
-        <h1 class="header-main-title">IEDC CSE (AI &amp; ML) / CSE (AI)</h1>
-        <div class="header-sub-title">Innovation &amp; Entrepreneurship Development Centre • Hall of Fame</div>
-      </div>
-    </div>
-
-    <!-- Top Right: Slide Dots, Theme Toggle, Clock & UEM Logo -->
-    <div class="tv-header-right">
-      <div class="tv-header-meta">
-        <div class="tv-header-meta-row">
-          <div class="tv-dots-track" id="tv-dots-track"></div>
-          <button class="tv-theme-toggle" id="tv-theme-toggle" title="Toggle Night Mode (Press N)" aria-label="Toggle Night Mode">
-            <svg class="theme-icon moon-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-            <svg class="theme-icon sun-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-            <span class="theme-toggle-label">Night</span>
-          </button>
-        </div>
-        <div class="tv-clock" id="tv-clock">12:00:00 PM</div>
-      </div>
-      <img src="assets/uem_logo.png" alt="UEM - University of Engineering & Management" class="branding-logo uem-logo">
-    </div>
-  </header>
-
-  <!-- Fullscreen TV Slides Stage -->
-  <main class="tv-stage" id="tv-stage">
-    <section class="tv-slide active" id="slide-cover" data-index="0">
-      <div class="tv-cover-slide">
-        <div class="tv-cover-tag">Innovation &amp; Entrepreneurship Development Centre • IEM Kolkata</div>
-        <h1 class="tv-cover-headline">IEDC CSE (AI &amp; ML) / CSE (AI)</h1>
-        <p class="tv-cover-desc">
-          Annual competitive achievements, national hackathon championships, and innovation honors (2023 – 2026).
-        </p>
-
-        <div class="tv-cover-stats">
-          <div class="tv-stat-block">
-            <div class="tv-stat-num crimson">22</div>
-            <div class="tv-stat-lbl">Total Recognitions</div>
-          </div>
-          <div class="tv-stat-block">
-            <div class="tv-stat-num">9</div>
-            <div class="tv-stat-lbl">1st / Grand Champions</div>
-          </div>
-          <div class="tv-stat-block">
-            <div class="tv-stat-num">4</div>
-            <div class="tv-stat-lbl">Runners-Up (2nd)</div>
-          </div>
-          <div class="tv-stat-block">
-            <div class="tv-stat-num">3</div>
-            <div class="tv-stat-lbl">3rd Place / Podiums</div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Bottom Autoplay Timer Progress Line -->
-  <div class="tv-progress-line">
-    <div class="tv-progress-bar" id="tv-progress-bar"></div>
+  <!-- Animated Mesh Background Blobs & Film Grain Overlay -->
+  <div class="mesh-background" id="mesh-background">
+    <div class="mesh-blob blob-1"></div>
+    <div class="mesh-blob blob-2"></div>
+    <div class="mesh-blob blob-3"></div>
   </div>
+  <div class="film-grain" aria-hidden="true"></div>
 
-  <!-- Discreet Admin Link for remote maintenance (bottom-right corner) -->
-  <div class="tv-admin-corner">
-    <a href="admin.html" class="tv-admin-link" title="Open Admin Management Portal (or press M)">⚙️ Admin</a>
+  <!-- Sparkles Canvas for Grand Champion Burst -->
+  <canvas id="sparkles-canvas" class="sparkles-canvas"></canvas>
+
+  <!-- TV Burn-in Protection Wrapper -->
+  <div class="burn-in-wrapper" id="burn-in-wrapper">
+
+    <!-- Quiet Apple TV Header Bar -->
+    <header class="apple-header">
+      <div class="apple-header-left">
+        <span class="apple-mini-tag">IEDC CSE (AI &amp; ML) • IEM Kolkata</span>
+      </div>
+      <div class="apple-clock" id="apple-clock" aria-label="Current Time">12:00:00 PM</div>
+    </header>
+
+    <!-- Keynote Presentation Stage -->
+    <main class="keynote-stage" id="keynote-stage" aria-live="polite">
+      <!-- Slides dynamically built by js/tv-app.js -->
+    </main>
+
+    <!-- Bottom Apple Progress Pill Track -->
+    <nav class="apple-dots-track" id="apple-dots-track" aria-label="Slideshow Controls"></nav>
+
+    <!-- Auto-hiding Admin Gear Hotspot (Bottom-Right) -->
+    <div class="admin-hotspot" id="admin-hotspot">
+      <a href="admin.html" class="admin-hotspot-link" title="Open Admin Portal (press M)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+          </path>
+        </svg>
+      </a>
+    </div>
+
   </div>
 
   <!-- Scripts -->

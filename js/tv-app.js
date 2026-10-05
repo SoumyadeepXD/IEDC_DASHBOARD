@@ -1,100 +1,129 @@
 // =====================================================================
-// ACHIEVEDECK - AMBIENT TV DISPLAY SLIDESHOW ENGINE
-// Continuous Autoplay, TV Typography, Zero Touch Required, Instant Render
+// IEDC HALL OF FAME — APPLE KEYNOTE AMBIENT TV DISPLAY ENGINE
+// 8s Slide Rotation, Particle Bursts, Count-Up Counters, Burn-in Safety
 // =====================================================================
 
-class TVPresentationEngine {
+class SparklesEngine {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.particles = [];
+    this.animId = null;
+
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+
+  triggerBurst() {
+    this.particles = [];
+    const count = 40;
+    const centerX = window.innerWidth * 0.25;
+    const centerY = window.innerHeight * 0.5;
+
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 6 + 2;
+      this.particles.push({
+        x: centerX,
+        y: centerY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.5,
+        radius: Math.random() * 4 + 2,
+        alpha: 1.0,
+        color: Math.random() > 0.3 ? '#ffd700' : '#fff5c0',
+        decay: Math.random() * 0.015 + 0.01
+      });
+    }
+
+    if (this.animId) cancelAnimationFrame(this.animId);
+    this.animate();
+  }
+
+  animate() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    let activeCount = 0;
+
+    for (let p of this.particles) {
+      if (p.alpha <= 0) continue;
+      activeCount++;
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.08; // subtle gravity
+      p.alpha -= p.decay;
+
+      this.ctx.save();
+      this.ctx.globalAlpha = Math.max(0, p.alpha);
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      this.ctx.fillStyle = p.color;
+      this.ctx.shadowBlur = 10;
+      this.ctx.shadowColor = p.color;
+      this.ctx.fill();
+      this.ctx.restore();
+    }
+
+    if (activeCount > 0) {
+      this.animId = requestAnimationFrame(() => this.animate());
+    } else {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
+}
+
+class KeynoteDisplayEngine {
   constructor() {
     this.achievements = [];
     this.currentSlideIndex = 0;
     this.slidesData = [];
-    this.slideDuration = 10000; // 10 seconds per slide for TV viewing
+    this.slideDuration = 8000; // 8 seconds per slide
     this.isPaused = false;
     this.progressInterval = null;
     this.progressElapsed = 0;
-    this.currentTheme = 'light';
+    this.sparkles = null;
+
+    // Controls timeout
+    this.mouseTimer = null;
 
     this.init();
   }
 
   init() {
-    // 0. Initialize theme (Night Mode / Day Mode)
-    this.initTheme();
+    // 1. Initialize Canvas Sparkles
+    const canvas = document.getElementById('sparkles-canvas');
+    if (canvas) this.sparkles = new SparklesEngine(canvas);
 
-    // 1. Immediately load data synchronously to guarantee 0ms render (never blank!)
+    // 2. Load Initial Data synchronously
     this.loadInitialData();
 
-    // 2. Build and render slides right away
-    this.buildSlides();
+    // 3. Build Manifest & Render Slides
+    this.buildSlidesManifest();
     this.renderSlides();
-    this.renderHeaderDots();
+    this.renderAppleDots();
 
-    // 3. Start ambient clock, autoplay loop, and input listeners
+    // 4. Start Ambient Clock, Autoplay & Listeners
     this.startClock();
     this.startAutoplay();
     this.bindControls();
+    this.setupBurnInProtection();
 
-    // 4. Asynchronously check for live updates in the background (non-blocking)
+    // 5. Check Remote Updates (non-blocking)
     this.checkRemoteUpdates();
-  }
-
-  initTheme() {
-    let savedTheme = null;
-    try {
-      savedTheme = localStorage.getItem('theme');
-    } catch (e) {}
-
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
-
-    this.setTheme(initialTheme);
-
-    const toggleBtn = document.getElementById('tv-theme-toggle');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => this.toggleTheme());
-    }
-  }
-
-  setTheme(theme) {
-    this.currentTheme = theme;
-    document.documentElement.setAttribute('data-theme', theme);
-    if (theme === 'dark') {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-
-    try {
-      localStorage.setItem('theme', theme);
-    } catch (e) {}
-
-    const toggleBtn = document.getElementById('tv-theme-toggle');
-    if (toggleBtn) {
-      toggleBtn.setAttribute('aria-pressed', theme === 'dark');
-      const label = toggleBtn.querySelector('.theme-toggle-label');
-      if (label) {
-        label.textContent = theme === 'dark' ? 'Day' : 'Night';
-      }
-      toggleBtn.setAttribute('title', theme === 'dark' ? 'Switch to Day Mode (Press N)' : 'Switch to Night Mode (Press N)');
-    }
-  }
-
-  toggleTheme() {
-    const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-    this.setTheme(newTheme);
   }
 
   loadInitialData() {
     let data = [];
-
-    // Priority 1: Check bundled data from data.js
     if (typeof INITIAL_ACHIEVEMENTS !== 'undefined' && Array.isArray(INITIAL_ACHIEVEMENTS) && INITIAL_ACHIEVEMENTS.length > 0) {
       data = JSON.parse(JSON.stringify(INITIAL_ACHIEVEMENTS));
     } else if (typeof window !== 'undefined' && Array.isArray(window.INITIAL_ACHIEVEMENTS) && window.INITIAL_ACHIEVEMENTS.length > 0) {
       data = JSON.parse(JSON.stringify(window.INITIAL_ACHIEVEMENTS));
     }
 
-    // Priority 2: Use localStorage ONLY if it contains a non-empty array
     try {
       if (typeof localStorage !== 'undefined') {
         const local = localStorage.getItem('achievements_data');
@@ -105,15 +134,12 @@ class TVPresentationEngine {
           }
         }
       }
-    } catch (e) {
-      console.warn('localStorage read skipped:', e);
-    }
+    } catch (e) { }
 
     this.achievements = data;
   }
 
   async checkRemoteUpdates() {
-    // Only attempt fetch when served over http/https
     if (typeof window === 'undefined') return;
     if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') return;
 
@@ -130,103 +156,112 @@ class TVPresentationEngine {
           this.achievements = json.data;
           try {
             localStorage.setItem('achievements_data', JSON.stringify(this.achievements));
-          } catch (e) {}
+          } catch (e) { }
 
           const currentIdx = this.currentSlideIndex;
-          this.buildSlides();
+          this.buildSlidesManifest();
           this.renderSlides();
-          this.renderHeaderDots();
+          this.renderAppleDots();
           this.goToSlide(Math.min(currentIdx, this.slidesData.length - 1));
         }
       }
-    } catch (e) {
-      // Quiet fallback - offline or local static file
-    }
+    } catch (e) { }
   }
 
-  getYears() {
-    const years = [...new Set(this.achievements.map(a => parseInt(a.year, 10)).filter(y => !isNaN(y)))];
-    return years.sort((a, b) => a - b);
-  }
-
-  buildSlides() {
-    const years = this.getYears();
+  buildSlidesManifest() {
     const slides = [
-      { type: 'cover', id: 'slide-cover' }
+      { type: 'cover', id: 'slide-cover' },
+      { type: 'stats', id: 'slide-stats' }
     ];
 
-    years.forEach(year => {
+    // One slide PER achievement
+    this.achievements.forEach((item, idx) => {
       slides.push({
-        type: 'year',
-        year: year,
-        id: `slide-year-${year}`
+        type: 'achievement',
+        id: `slide-ach-${item.id || idx}`,
+        data: item
       });
     });
 
-    slides.push({
-      type: 'summary',
-      id: 'slide-summary'
-    });
+    // Timeline and Closing slides
+    slides.push({ type: 'timeline', id: 'slide-timeline' });
+    slides.push({ type: 'closing', id: 'slide-closing' });
 
     this.slidesData = slides;
   }
 
-  renderHeaderDots() {
-    const track = document.getElementById('tv-dots-track');
+  renderAppleDots() {
+    const track = document.getElementById('apple-dots-track');
     if (!track) return;
 
     track.innerHTML = this.slidesData.map((_, idx) => `
-      <div class="tv-dot ${idx === this.currentSlideIndex ? 'active' : ''}" data-index="${idx}"></div>
+      <div class="apple-dot ${idx === this.currentSlideIndex ? 'active' : ''}" data-index="${idx}" role="tab" aria-selected="${idx === this.currentSlideIndex}">
+        ${idx === this.currentSlideIndex ? '<div class="apple-dot-fill" id="apple-dot-fill"></div>' : ''}
+      </div>
     `).join('');
   }
 
   renderSlides() {
-    const stage = document.getElementById('tv-stage');
+    const stage = document.getElementById('keynote-stage');
     if (!stage) return;
 
     stage.innerHTML = this.slidesData.map((slide, idx) => {
-      if (slide.type === 'cover') {
-        return this.renderCoverSlideHtml(idx);
-      } else if (slide.type === 'year') {
-        return this.renderYearSlideHtml(slide.year, idx);
-      } else if (slide.type === 'summary') {
-        return this.renderSummarySlideHtml(idx);
-      }
+      if (slide.type === 'cover') return this.renderCoverSlideHtml(idx);
+      if (slide.type === 'stats') return this.renderStatsSlideHtml(idx);
+      if (slide.type === 'achievement') return this.renderAchievementSlideHtml(slide.data, idx);
+      if (slide.type === 'timeline') return this.renderTimelineSlideHtml(idx);
+      if (slide.type === 'closing') return this.renderClosingSlideHtml(idx);
       return '';
     }).join('');
   }
 
   renderCoverSlideHtml(idx) {
-    const totalWins = this.achievements.filter(a => a.awardTier === 'winner').length;
-    const totalRunners = this.achievements.filter(a => a.awardTier === 'runner-up').length;
-    const totalThirds = this.achievements.filter(a => a.awardTier === 'third-place').length;
-    const totalCount = this.achievements.length;
+    const words = ["Hall", "of", "Fame."];
+    const wordHtml = words.map((w, i) => `<span class="word-span" style="transition-delay: ${0.2 + i * 0.2}s">${w}</span>`).join(' ');
 
     return `
-      <section class="tv-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-cover" data-index="${idx}">
-        <div class="tv-cover-slide">
-          <div class="tv-cover-tag">Innovation &amp; Entrepreneurship Development Centre • IEM Kolkata</div>
-          <h1 class="tv-cover-headline">IEDC CSE (AI &amp; ML) / CSE (AI)</h1>
-          <p class="tv-cover-desc">
-            Annual competitive achievements, national hackathon championships, and innovation honors (2023 – 2026).
+      <section class="keynote-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-cover" data-index="${idx}">
+        <div class="cover-container">
+          <div class="cover-tag reveal-item delay-1">Innovation &amp; Entrepreneurship Development Centre • IEM Kolkata</div>
+          <h1 class="cover-title">${wordHtml}</h1>
+          <p class="cover-subtitle reveal-item delay-4">
+            IEDC CSE (AI &amp; ML) / CSE (AI) · National hackathon championships, premier innovation honors, and competitive benchmarks (2023 – 2026).
           </p>
+        </div>
+      </section>
+    `;
+  }
 
-          <div class="tv-cover-stats">
-            <div class="tv-stat-block">
-              <div class="tv-stat-num crimson">${totalCount}</div>
-              <div class="tv-stat-lbl">Total Recognitions</div>
+  renderStatsSlideHtml(idx) {
+    const totalCount = this.achievements.length;
+    const winsCount = this.achievements.filter(a => a.awardTier === 'winner').length;
+    const podiumsCount = this.achievements.filter(a => a.awardTier === 'winner' || a.awardTier === 'runner-up' || a.awardTier === 'third-place').length;
+    const flagshipsCount = this.achievements.filter(a => a.awardTier === 'finalist' || (a.category && a.category.includes('Flagship')) || (a.tags && a.tags.includes('SIH'))).length || 4;
+
+    return `
+      <section class="keynote-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-stats" data-index="${idx}">
+        <div class="stats-container">
+          <div class="stats-header reveal-item delay-1">Institutional Track Record · 2023 – 2026</div>
+          <div class="stats-grid">
+            <div class="stat-card reveal-item delay-2">
+              <div class="stat-card-glow"></div>
+              <div class="stat-number" data-count="${totalCount}">0</div>
+              <div class="stat-label">Recognitions</div>
             </div>
-            <div class="tv-stat-block">
-              <div class="tv-stat-num">${totalWins}</div>
-              <div class="tv-stat-lbl">1st / Grand Champions</div>
+            <div class="stat-card reveal-item delay-3">
+              <div class="stat-card-glow"></div>
+              <div class="stat-number" data-count="${winsCount}">0</div>
+              <div class="stat-label">Championships</div>
             </div>
-            <div class="tv-stat-block">
-              <div class="tv-stat-num">${totalRunners}</div>
-              <div class="tv-stat-lbl">Runners-Up (2nd)</div>
+            <div class="stat-card reveal-item delay-4">
+              <div class="stat-card-glow"></div>
+              <div class="stat-number" data-count="${podiumsCount}">0</div>
+              <div class="stat-label">Podium Finishes</div>
             </div>
-            <div class="tv-stat-block">
-              <div class="tv-stat-num">${totalThirds}</div>
-              <div class="tv-stat-lbl">3rd Place / Podiums</div>
+            <div class="stat-card reveal-item delay-5">
+              <div class="stat-card-glow"></div>
+              <div class="stat-number" data-count="${flagshipsCount}">0</div>
+              <div class="stat-label">National Flagships</div>
             </div>
           </div>
         </div>
@@ -234,192 +269,179 @@ class TVPresentationEngine {
     `;
   }
 
-  renderYearSlideHtml(year, idx) {
-    const items = this.achievements.filter(a => parseInt(a.year, 10) === year);
-    const winCount = items.filter(a => a.awardTier === 'winner').length;
-
-    const yearDetails = {
-      2023: {
-        tagline: "The Foundation & National Flagship Title",
-        desc: "Setting an unprecedented institutional benchmark with grand victory at the Smart India Hackathon."
-      },
-      2024: {
-        tagline: "High-Impact Multi-Disciplinary Momentum",
-        desc: "Sweeping victories across aerospace engineering with ISRO, entrepreneurship, and innovation meets."
-      },
-      2025: {
-        tagline: "Dominance Across AI, B-Plan & Regional Tech",
-        desc: "Best AI Hack recognition, IIT Kharagpur podium finish, and community hackathon championships."
-      },
-      2026: {
-        tagline: "Championship Pinnacle & Triple Crown",
-        desc: "IIT-BHU Innovation Expo overall winner, Colloquium 1st prize, and Binary V2 triple sweep."
-      }
+  renderAchievementSlideHtml(item, idx) {
+    const rankMap = {
+      'winner': { rank: '1st', cls: 'rank-gold', badge: item.badge || 'Grand Champion' },
+      'runner-up': { rank: '2nd', cls: 'rank-silver', badge: item.badge || 'Runner Up' },
+      'third-place': { rank: '3rd', cls: 'rank-bronze', badge: item.badge || '3rd Podium' },
+      'finalist': { rank: 'Finalist', cls: 'rank-finalist', badge: item.badge || 'National Finalist' },
+      'special': { rank: 'Special', cls: 'rank-special', badge: item.badge || 'Special Track' }
     };
 
-    const details = yearDetails[year] || {
-      tagline: `Competitive Record for ${year}`,
-      desc: `Major project championships and recognitions achieved in ${year}.`
-    };
-
-    const isSingleItem = items.length === 1;
-    const gridClass = isSingleItem ? 'grid-1' : 'grid-many';
+    const info = rankMap[item.awardTier] || { rank: 'Award', cls: 'rank-crimson', badge: item.badge || 'Recognition' };
+    const tags = Array.isArray(item.tags) ? item.tags : [];
 
     return `
-      <section class="tv-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-year-${year}" data-index="${idx}">
-        <div class="tv-year-split">
-          <!-- Left Column -->
-          <div class="tv-year-aside">
-            <div>
-              <div class="tv-year-num">${year}</div>
-              <h2 class="tv-year-tagline">${details.tagline}</h2>
-              <p class="tv-year-summary">${details.desc}</p>
-            </div>
+      <section class="keynote-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-ach-${item.id}" data-index="${idx}" data-tier="${item.awardTier || 'winner'}">
+        <div class="faint-year-numeral">${item.year}</div>
 
-            <div class="tv-year-meta-box">
-              <div class="tv-year-count-pill">
-                <span>${items.length}</span> Major Honors in ${year}
-              </div>
-              <div style="font-size: clamp(0.95rem, 1.15vw, 1.25rem); color: var(--text-muted); margin-top: 4px;">
-                ${winCount} 1st Place / Champion Trophies
-              </div>
-            </div>
+        <div class="ach-slide-layout">
+          <!-- Rank Block -->
+          <div class="ach-rank-block reveal-item delay-1">
+            <div class="ach-rank-text ${info.cls}">${info.rank}</div>
+            <div class="ach-badge-tag">${info.badge}</div>
           </div>
 
-          <!-- Right Column -->
-          <div class="tv-achievements-container">
-            <div class="tv-cards-grid ${gridClass}">
-              ${items.map(item => this.renderTvCardHtml(item, isSingleItem)).join('')}
-            </div>
+          <!-- Content Block -->
+          <div class="ach-content-block">
+            <h2 class="ach-headline reveal-item delay-2">${item.title}</h2>
+            ${item.organization ? `<div class="ach-org-line reveal-item delay-3">${item.organization} ${item.category ? `· ${item.category}` : ''}</div>` : ''}
+            ${item.description ? `<p class="ach-desc reveal-item delay-4">${item.description}</p>` : ''}
+            
+            ${tags.length > 0 ? `
+              <div class="ach-tags-row reveal-item delay-5">
+                ${tags.map(t => `<span class="ach-tag-pill">#${t}</span>`).join('')}
+              </div>
+            ` : ''}
           </div>
         </div>
       </section>
     `;
   }
 
-  renderTvCardHtml(item, isHero) {
-    const badgeTypes = {
-      'winner': { cls: 'badge-winner', label: item.badge || 'WINNER' },
-      'runner-up': { cls: 'badge-runner', label: item.badge || '2ND PLACE' },
-      'third-place': { cls: 'badge-bronze', label: item.badge || '3RD PLACE' },
-      'finalist': { cls: 'badge-finalist', label: item.badge || 'FINALIST' },
-      'special': { cls: 'badge-track', label: item.badge || 'SPECIAL TRACK' }
-    };
-
-    const badge = badgeTypes[item.awardTier] || { cls: 'badge-winner', label: item.badge || 'AWARD' };
-    const tierClass = `card-tier-${item.awardTier || 'winner'}`;
+  renderTimelineSlideHtml(idx) {
+    const years = [2023, 2024, 2025, 2026];
+    const counts = years.map(y => this.achievements.filter(a => parseInt(a.year, 10) === y).length);
 
     return `
-      <article class="tv-card ${isHero ? 'tv-card-hero' : ''} ${tierClass}">
-        <div class="tv-card-header">
-          <span class="tv-card-badge ${badge.cls}">${badge.label}</span>
-          <span class="tv-card-category">${item.category || ''}</span>
-        </div>
-
-        <h3 class="tv-card-title">${item.title}</h3>
-
-        <div class="tv-card-meta">
-          ${item.organization ? `<strong>${item.organization}</strong>` : ''}
-          ${item.description && isHero ? `<p class="tv-card-detail" style="margin-top: 1.2vh; color: var(--text-secondary);">${item.description}</p>` : ''}
-        </div>
-      </article>
-    `;
-  }
-
-  renderSummarySlideHtml(idx) {
-    const winners = this.achievements.filter(a => a.awardTier === 'winner').length;
-    const runners = this.achievements.filter(a => a.awardTier === 'runner-up').length;
-    const thirds = this.achievements.filter(a => a.awardTier === 'third-place').length;
-    const finalists = this.achievements.filter(a => a.awardTier === 'finalist').length;
-    const specials = this.achievements.filter(a => a.awardTier === 'special').length;
-
-    return `
-      <section class="tv-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-summary" data-index="${idx}">
-        <div class="tv-summary-split">
-          <div class="tv-summary-panel">
-            <h2 class="tv-summary-heading">All-Time Cumulative Podiums</h2>
-            <div class="tv-summary-list">
-              <div class="tv-summary-item">
-                <span class="tv-summary-item-label">🏆 1st Prize &amp; Grand Champions</span>
-                <span class="tv-summary-item-val">${winners}</span>
-              </div>
-              <div class="tv-summary-item">
-                <span class="tv-summary-item-label">🥈 2nd Place / Runners-Up</span>
-                <span class="tv-summary-item-val">${runners}</span>
-              </div>
-              <div class="tv-summary-item">
-                <span class="tv-summary-item-label">🥉 3rd Place / 2nd Runners-Up</span>
-                <span class="tv-summary-item-val">${thirds}</span>
-              </div>
-              <div class="tv-summary-item">
-                <span class="tv-summary-item-label">🎖️ National Flagship Finalists</span>
-                <span class="tv-summary-item-val">${finalists}</span>
-              </div>
-              <div class="tv-summary-item">
-                <span class="tv-summary-item-label">🌟 Bounty &amp; Special Track Wins</span>
-                <span class="tv-summary-item-val">${specials}</span>
-              </div>
-            </div>
+      <section class="keynote-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-timeline" data-index="${idx}">
+        <div class="timeline-container">
+          <div class="timeline-title reveal-item delay-1">Evolution of Excellence</div>
+          
+          <div class="timeline-track-wrap reveal-item delay-2">
+            <svg class="timeline-svg-line" viewBox="0 0 1000 10" preserveAspectRatio="none">
+              <path d="M0 5 L1000 5" />
+              <path class="active-line" d="M0 5 L1000 5" />
+            </svg>
           </div>
 
-          <div class="tv-summary-panel">
-            <div class="tv-spotlight-box">
-              <div class="tv-spotlight-item">
-                <h4>🏛️ Smart India Hackathon (SIH)</h4>
-                <p>Crowned Grand Champions in SIH 2023, along with consecutive national finalist selections in SIH 2024 and SIH 2025.</p>
+          <div class="timeline-years-grid">
+            ${years.map((yr, i) => `
+              <div class="timeline-year-node ${i === 3 ? 'active' : ''} reveal-item delay-${i + 2}">
+                <div class="timeline-year-num">${yr}</div>
+                <div class="timeline-year-count">${counts[i]} Major Honors</div>
               </div>
-              <div class="tv-spotlight-item">
-                <h4>🚀 ISRO Space Hackathon</h4>
-                <p>1st Place Winner solving critical space technology and satellite problem statements with ISRO.</p>
-              </div>
-              <div class="tv-spotlight-item">
-                <h4>🎓 Premier Institutes (IIT BHU &amp; IIT Kharagpur)</h4>
-                <p>Grand Winner at IIT-BHU Innovation Expo 2026 and 2nd Runner-Up in the IIT Kharagpur B-Plan Competition.</p>
-              </div>
-              <div class="tv-spotlight-item">
-                <h4>⚡ Binary V2 Triple Crown</h4>
-                <p>Triple distinction in 2026: Overall 2nd Runner-Up, Algorand Bounty Winner, and Open Innovation Track Winner.</p>
-              </div>
-            </div>
+            `).join('')}
           </div>
         </div>
       </section>
     `;
+  }
+
+  renderClosingSlideHtml(idx) {
+    return `
+      <section class="keynote-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-closing" data-index="${idx}">
+        <div class="closing-container">
+          <div class="closing-logos-lockup reveal-item delay-1">
+            <img src="assets/iem_logo.png" alt="IEM Logo" class="closing-logo">
+            <img src="assets/iedc_logo.png" alt="IEDC Logo" class="closing-logo" style="border-radius: 50%;">
+            <img src="assets/uem_logo.png" alt="UEM Logo" class="closing-logo">
+          </div>
+          
+          <h2 class="closing-headline reveal-item delay-2">Hall of Fame</h2>
+          <p class="closing-subtext reveal-item delay-3">
+            IEDC CSE (AI &amp; ML) / CSE (AI) · Institute of Engineering &amp; Management, Kolkata
+          </p>
+        </div>
+      </section>
+    `;
+  }
+
+  updateAmbientMeshTint(tier) {
+    const mesh = document.getElementById('mesh-background');
+    if (!mesh) return;
+
+    const tints = {
+      'winner': ['rgba(255, 179, 0, 0.22)', 'rgba(255, 143, 0, 0.16)', 'rgba(255, 213, 79, 0.1)'],
+      'runner-up': ['rgba(176, 190, 197, 0.22)', 'rgba(120, 144, 156, 0.16)', 'rgba(207, 216, 220, 0.1)'],
+      'third-place': ['rgba(251, 140, 0, 0.22)', 'rgba(230, 81, 0, 0.16)', 'rgba(255, 183, 77, 0.1)'],
+      'finalist': ['rgba(102, 187, 106, 0.20)', 'rgba(46, 125, 50, 0.14)', 'rgba(165, 214, 167, 0.1)'],
+      'special': ['rgba(171, 71, 188, 0.22)', 'rgba(123, 31, 162, 0.16)', 'rgba(225, 190, 231, 0.1)'],
+      'cover': ['rgba(239, 68, 68, 0.22)', 'rgba(185, 28, 28, 0.16)', 'rgba(120, 113, 108, 0.1)'],
+      'closing': ['rgba(239, 68, 68, 0.18)', 'rgba(185, 28, 28, 0.12)', 'rgba(120, 113, 108, 0.08)']
+    };
+
+    const colors = tints[tier] || tints['cover'];
+    mesh.style.setProperty('--mesh-color-1', colors[0]);
+    mesh.style.setProperty('--mesh-color-2', colors[1]);
+    mesh.style.setProperty('--mesh-color-3', colors[2]);
+  }
+
+  animateStatsCounter(slideEl) {
+    if (!slideEl) return;
+    const nums = slideEl.querySelectorAll('.stat-number');
+    nums.forEach(num => {
+      const target = parseInt(num.getAttribute('data-count'), 10) || 0;
+      const duration = 2000;
+      const startTime = performance.now();
+
+      const updateCount = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        // easeOutExpo formula
+        const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const current = Math.floor(easeProgress * target);
+        num.textContent = current;
+
+        if (progress < 1) {
+          requestAnimationFrame(updateCount);
+        } else {
+          num.textContent = target;
+        }
+      };
+
+      requestAnimationFrame(updateCount);
+    });
   }
 
   goToSlide(index) {
     if (index < 0 || index >= this.slidesData.length) return;
 
-    const slides = document.querySelectorAll('.tv-slide');
-    const dots = document.querySelectorAll('.tv-dot');
-
+    const slides = document.querySelectorAll('.keynote-slide');
     const prevIndex = this.currentSlideIndex;
     const prevSlide = slides[prevIndex];
     const nextSlide = slides[index];
 
     if (prevSlide && prevIndex !== index) {
       prevSlide.classList.remove('active');
-      prevSlide.classList.add('slide-out');
+      prevSlide.classList.add('slide-outgoing');
       setTimeout(() => {
-        prevSlide.classList.remove('slide-out');
-      }, 650);
+        prevSlide.classList.remove('slide-outgoing');
+      }, 1000);
     }
 
     this.currentSlideIndex = index;
 
     if (nextSlide) {
-      nextSlide.classList.remove('slide-out');
+      nextSlide.classList.remove('slide-outgoing');
       nextSlide.classList.add('active');
+
+      const slideData = this.slidesData[index];
+      const tier = slideData.type === 'achievement' ? slideData.data.awardTier : slideData.type;
+      this.updateAmbientMeshTint(tier);
+
+      // Trigger stats counter if stats slide
+      if (slideData.type === 'stats') {
+        this.animateStatsCounter(nextSlide);
+      }
+
+      // Trigger sparkles burst if Grand Champion slide
+      if (slideData.type === 'achievement' && slideData.data.awardTier === 'winner' && this.sparkles) {
+        setTimeout(() => this.sparkles.triggerBurst(), 400);
+      }
     }
 
-    dots.forEach((dot, idx) => {
-      if (idx === this.currentSlideIndex) {
-        dot.classList.add('active');
-      } else {
-        dot.classList.remove('active');
-      }
-    });
-
+    this.renderAppleDots();
     this.progressElapsed = 0;
     this.updateProgressBar();
   }
@@ -435,7 +457,7 @@ class TVPresentationEngine {
   }
 
   startAutoplay() {
-    const tickInterval = 50; // update progress every 50ms
+    const tickInterval = 50;
     this.progressElapsed = 0;
 
     clearInterval(this.progressInterval);
@@ -453,29 +475,46 @@ class TVPresentationEngine {
   }
 
   updateProgressBar() {
-    const bar = document.getElementById('tv-progress-bar');
-    if (!bar) return;
+    const fill = document.getElementById('apple-dot-fill');
+    if (!fill) return;
     const pct = Math.min(100, (this.progressElapsed / this.slideDuration) * 100);
-    bar.style.width = `${pct}%`;
+    fill.style.width = `${pct}%`;
   }
 
   startClock() {
-    const clockEl = document.getElementById('tv-clock');
+    const clockEl = document.getElementById('apple-clock');
     if (!clockEl) return;
 
     const update = () => {
       const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-      clockEl.textContent = `${timeStr} • ${dateStr}`;
+      clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     };
 
     update();
     setInterval(update, 1000);
   }
 
+  setupBurnInProtection() {
+    // Every 3 minutes, subtly shift burn-in wrapper by 1-2px
+    const wrapper = document.getElementById('burn-in-wrapper');
+    if (!wrapper) return;
+
+    setInterval(() => {
+      const shiftX = (Math.random() * 4 - 2).toFixed(1);
+      const shiftY = (Math.random() * 4 - 2).toFixed(1);
+      wrapper.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+    }, 180000);
+  }
+
   bindControls() {
-    // Keyboard navigation for wireless clicker or TV remote
+    // Hover over stage to pause timer
+    const stage = document.getElementById('keynote-stage');
+    if (stage) {
+      stage.addEventListener('mouseenter', () => { this.isPaused = true; });
+      stage.addEventListener('mouseleave', () => { this.isPaused = false; });
+    }
+
+    // Keyboard navigation
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowRight':
@@ -501,32 +540,44 @@ class TVPresentationEngine {
         case 'M':
           window.location.href = 'admin.html';
           break;
-        case 'n':
-        case 'N':
-          this.toggleTheme();
-          break;
       }
     });
 
-    // Tap/Click on dots to jump directly
-    document.querySelectorAll('.tv-dot').forEach(dot => {
-      dot.addEventListener('click', () => {
-        const idx = parseInt(dot.getAttribute('data-index'), 10);
-        this.goToSlide(idx);
-      });
+    // Auto-hide cursor and show admin hotspot on mouse movement
+    window.addEventListener('mousemove', () => {
+      document.body.classList.remove('hide-cursor');
+      document.body.classList.add('show-controls');
+
+      clearTimeout(this.mouseTimer);
+      this.mouseTimer = setTimeout(() => {
+        document.body.classList.add('hide-cursor');
+        document.body.classList.remove('show-controls');
+      }, 2500);
     });
+
+    // Click on dots to jump directly
+    const track = document.getElementById('apple-dots-track');
+    if (track) {
+      track.addEventListener('click', (e) => {
+        const dot = e.target.closest('.apple-dot');
+        if (dot) {
+          const idx = parseInt(dot.getAttribute('data-index'), 10);
+          this.goToSlide(idx);
+        }
+      });
+    }
   }
 }
 
-// Immediate and robust launcher (works even if DOMContentLoaded already fired)
-function launchTvPresentation() {
-  if (!window.tvEngine) {
-    window.tvEngine = new TVPresentationEngine();
+// Immediate and robust launcher
+function launchKeynotePresentation() {
+  if (!window.keynoteEngine) {
+    window.keynoteEngine = new KeynoteDisplayEngine();
   }
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', launchTvPresentation);
+  document.addEventListener('DOMContentLoaded', launchKeynotePresentation);
 } else {
-  launchTvPresentation();
+  launchKeynotePresentation();
 }
