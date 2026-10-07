@@ -183,15 +183,14 @@ class KeynoteDisplayEngine {
       });
     });
 
-    // Timeline and Closing slides
+    // Timeline slide
     slides.push({ type: 'timeline', id: 'slide-timeline' });
-    slides.push({ type: 'closing', id: 'slide-closing' });
 
     this.slidesData = slides;
   }
 
   renderAppleDots() {
-    const track = document.getElementById('apple-dots-track');
+    const track = document.getElementById('tv-dots-track') || document.getElementById('apple-dots-track');
     if (!track) return;
 
     track.innerHTML = this.slidesData.map((_, idx) => `
@@ -202,7 +201,7 @@ class KeynoteDisplayEngine {
   }
 
   renderSlides() {
-    const stage = document.getElementById('keynote-stage');
+    const stage = document.getElementById('tv-stage') || document.getElementById('keynote-stage');
     if (!stage) return;
 
     stage.innerHTML = this.slidesData.map((slide, idx) => {
@@ -216,17 +215,40 @@ class KeynoteDisplayEngine {
   }
 
   renderCoverSlideHtml(idx) {
-    const words = ["Hall", "of", "Fame."];
-    const wordHtml = words.map((w, i) => `<span class="word-span" style="transition-delay: ${0.2 + i * 0.2}s">${w}</span>`).join(' ');
+    const totalCount = this.achievements.length || 22;
+    const winsCount = this.achievements.filter(a => a.awardTier === 'winner').length || 9;
+    const runnersCount = this.achievements.filter(a => a.awardTier === 'runner-up').length || 4;
+    const podiumsCount = this.achievements.filter(a => a.awardTier === 'third-place').length || 3;
 
     return `
-      <section class="keynote-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-cover" data-index="${idx}">
-        <div class="cover-container">
-          <div class="cover-tag reveal-item delay-1">Innovation &amp; Entrepreneurship Development Centre • IEM Kolkata</div>
-          <h1 class="cover-title">${wordHtml}</h1>
-          <p class="cover-subtitle reveal-item delay-4">
-            IEDC CSE (AI &amp; ML) / CSE (AI) · National hackathon championships, premier innovation honors, and competitive benchmarks (2023 – 2026).
+      <section class="tv-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-cover" data-index="${idx}">
+        <div class="tv-cover-slide">
+          <div class="tv-cover-tag stagger-1">Innovation &amp; Entrepreneurship Development Centre • IEM Kolkata</div>
+          <h1 class="tv-cover-headline stagger-2">
+            IEDC CSE(AI)<br><span class="cover-line-2">CSE(AI &amp; ML)</span>
+          </h1>
+          <p class="tv-cover-desc stagger-3">
+            Annual competitive achievements, national hackathon championships, and innovation honors (2023 - 2026).
           </p>
+
+          <div class="tv-cover-stats stagger-4">
+            <div class="tv-stat-block">
+              <div class="tv-stat-num crimson" data-count="${totalCount}">0</div>
+              <div class="tv-stat-lbl">Total Recognitions</div>
+            </div>
+            <div class="tv-stat-block">
+              <div class="tv-stat-num" data-count="${winsCount}">0</div>
+              <div class="tv-stat-lbl">1st / Grand Champions</div>
+            </div>
+            <div class="tv-stat-block">
+              <div class="tv-stat-num" data-count="${runnersCount}">0</div>
+              <div class="tv-stat-lbl">Runners-Up (2nd)</div>
+            </div>
+            <div class="tv-stat-block">
+              <div class="tv-stat-num" data-count="${podiumsCount}">0</div>
+              <div class="tv-stat-lbl">3rd Place / Podiums</div>
+            </div>
+          </div>
         </div>
       </section>
     `;
@@ -281,6 +303,17 @@ class KeynoteDisplayEngine {
     const info = rankMap[item.awardTier] || { rank: 'Award', cls: 'rank-crimson', badge: item.badge || 'Recognition' };
     const tags = Array.isArray(item.tags) ? item.tags : [];
 
+    // Parse numeric and ordinal suffix (e.g. 1st -> num: 1, suffix: st)
+    const match = info.rank.match(/^(\d+)([a-zA-Z]+)$/);
+    let rankMarkup = '';
+    if (match) {
+      const [, num, suffix] = match;
+      rankMarkup = `<span class="rank-num">${num}</span><span class="rank-suffix">${suffix}</span>`;
+    } else {
+      const isLongRank = info.rank.length > 4;
+      rankMarkup = `<span class="${isLongRank ? 'rank-text-long' : ''}">${info.rank}</span>`;
+    }
+
     return `
       <section class="keynote-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-ach-${item.id}" data-index="${idx}" data-tier="${item.awardTier || 'winner'}">
         <div class="faint-year-numeral">${item.year}</div>
@@ -288,7 +321,7 @@ class KeynoteDisplayEngine {
         <div class="ach-slide-layout">
           <!-- Rank Block -->
           <div class="ach-rank-block reveal-item delay-1">
-            <div class="ach-rank-text ${info.cls}">${info.rank}</div>
+            <div class="ach-rank-text ${info.cls}">${rankMarkup}</div>
             <div class="ach-badge-tag">${info.badge}</div>
           </div>
 
@@ -344,7 +377,7 @@ class KeynoteDisplayEngine {
         <div class="closing-container">
           <div class="closing-logos-lockup reveal-item delay-1">
             <img src="assets/iem_logo.png" alt="IEM Logo" class="closing-logo">
-            <img src="assets/iedc_logo.png" alt="IEDC Logo" class="closing-logo" style="border-radius: 50%;">
+            <img src="assets/iedc_logo.png" alt="IEDC Logo" class="closing-logo">
             <img src="assets/uem_logo.png" alt="UEM Logo" class="closing-logo">
           </div>
           
@@ -379,10 +412,10 @@ class KeynoteDisplayEngine {
 
   animateStatsCounter(slideEl) {
     if (!slideEl) return;
-    const nums = slideEl.querySelectorAll('.stat-number');
+    const nums = slideEl.querySelectorAll('.tv-stat-num, .stat-number');
     nums.forEach(num => {
-      const target = parseInt(num.getAttribute('data-count'), 10) || 0;
-      const duration = 2000;
+      const target = parseInt(num.getAttribute('data-target') || num.getAttribute('data-count'), 10) || 0;
+      const duration = 1800; // ~1.8s
       const startTime = performance.now();
 
       const updateCount = (now) => {
@@ -407,7 +440,7 @@ class KeynoteDisplayEngine {
   goToSlide(index) {
     if (index < 0 || index >= this.slidesData.length) return;
 
-    const slides = document.querySelectorAll('.keynote-slide');
+    const slides = document.querySelectorAll('.tv-slide, .keynote-slide');
     const prevIndex = this.currentSlideIndex;
     const prevSlide = slides[prevIndex];
     const nextSlide = slides[index];
@@ -417,7 +450,7 @@ class KeynoteDisplayEngine {
       prevSlide.classList.add('slide-outgoing');
       setTimeout(() => {
         prevSlide.classList.remove('slide-outgoing');
-      }, 1000);
+      }, 800);
     }
 
     this.currentSlideIndex = index;
@@ -430,8 +463,8 @@ class KeynoteDisplayEngine {
       const tier = slideData.type === 'achievement' ? slideData.data.awardTier : slideData.type;
       this.updateAmbientMeshTint(tier);
 
-      // Trigger stats counter if stats slide
-      if (slideData.type === 'stats') {
+      // Trigger stats counter if cover or stats slide
+      if (slideData.type === 'cover' || slideData.type === 'stats') {
         this.animateStatsCounter(nextSlide);
       }
 
@@ -475,14 +508,14 @@ class KeynoteDisplayEngine {
   }
 
   updateProgressBar() {
-    const fill = document.getElementById('apple-dot-fill');
+    const fill = document.getElementById('tv-progress-bar') || document.getElementById('apple-dot-fill');
     if (!fill) return;
     const pct = Math.min(100, (this.progressElapsed / this.slideDuration) * 100);
     fill.style.width = `${pct}%`;
   }
 
   startClock() {
-    const clockEl = document.getElementById('apple-clock');
+    const clockEl = document.getElementById('tv-clock') || document.getElementById('apple-clock');
     if (!clockEl) return;
 
     const update = () => {
@@ -495,8 +528,8 @@ class KeynoteDisplayEngine {
   }
 
   setupBurnInProtection() {
-    // Every 3 minutes, subtly shift burn-in wrapper by 1-2px
-    const wrapper = document.getElementById('burn-in-wrapper');
+    // Every 3 minutes, subtly shift stage/wrapper by 1-2px
+    const wrapper = document.getElementById('burn-in-wrapper') || document.getElementById('tv-stage') || document.body;
     if (!wrapper) return;
 
     setInterval(() => {
@@ -508,7 +541,7 @@ class KeynoteDisplayEngine {
 
   bindControls() {
     // Hover over stage to pause timer
-    const stage = document.getElementById('keynote-stage');
+    const stage = document.getElementById('tv-stage') || document.getElementById('keynote-stage');
     if (stage) {
       stage.addEventListener('mouseenter', () => { this.isPaused = true; });
       stage.addEventListener('mouseleave', () => { this.isPaused = false; });
@@ -543,7 +576,7 @@ class KeynoteDisplayEngine {
       }
     });
 
-    // Auto-hide cursor and show admin hotspot on mouse movement
+    // Auto-hide cursor and show admin corner on mouse movement
     window.addEventListener('mousemove', () => {
       document.body.classList.remove('hide-cursor');
       document.body.classList.add('show-controls');
@@ -552,11 +585,11 @@ class KeynoteDisplayEngine {
       this.mouseTimer = setTimeout(() => {
         document.body.classList.add('hide-cursor');
         document.body.classList.remove('show-controls');
-      }, 2500);
+      }, 2000);
     });
 
     // Click on dots to jump directly
-    const track = document.getElementById('apple-dots-track');
+    const track = document.getElementById('tv-dots-track') || document.getElementById('apple-dots-track');
     if (track) {
       track.addEventListener('click', (e) => {
         const dot = e.target.closest('.apple-dot');

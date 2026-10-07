@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IEDC CSE (AI &amp; ML) / CSE (AI) — Hall of Fame</title>
+  <title>IEDC CSE(AI)/CSE(AI &amp; ML) - Hall of Fame</title>
   <meta name="description"
-    content="Cinematic Apple-keynote ambient TV display for IEDC CSE (AI & ML) / CSE (AI), IEM Kolkata.">
+    content="Minimalist ambient TV display slideshow showcasing year-wise competitive achievements and hackathon championships.">
 
-  <!-- Inter Font Preload -->
+  <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -22,49 +22,86 @@
 
 <body>
 
-  <!-- Animated Mesh Background Blobs & Film Grain Overlay -->
-  <div class="mesh-background" id="mesh-background">
-    <div class="mesh-blob blob-1"></div>
-    <div class="mesh-blob blob-2"></div>
-    <div class="mesh-blob blob-3"></div>
+  <!-- Ambient Drifting Gradient Glow & Grain Overlay -->
+  <div class="tv-ambient-bg" aria-hidden="true">
+    <div class="ambient-blob blob-left"></div>
+    <div class="ambient-blob blob-right"></div>
   </div>
-  <div class="film-grain" aria-hidden="true"></div>
+  <div class="tv-grain-overlay" aria-hidden="true"></div>
 
-  <!-- Sparkles Canvas for Grand Champion Burst -->
-  <canvas id="sparkles-canvas" class="sparkles-canvas"></canvas>
-
-  <!-- TV Burn-in Protection Wrapper -->
-  <div class="burn-in-wrapper" id="burn-in-wrapper">
-
-    <!-- Quiet Apple TV Header Bar -->
-    <header class="apple-header">
-      <div class="apple-header-left">
-        <span class="apple-mini-tag">IEDC CSE (AI &amp; ML) • IEM Kolkata</span>
-      </div>
-      <div class="apple-clock" id="apple-clock" aria-label="Current Time">12:00:00 PM</div>
-    </header>
-
-    <!-- Keynote Presentation Stage -->
-    <main class="keynote-stage" id="keynote-stage" aria-live="polite">
-      <!-- Slides dynamically built by js/tv-app.js -->
-    </main>
-
-    <!-- Bottom Apple Progress Pill Track -->
-    <nav class="apple-dots-track" id="apple-dots-track" aria-label="Slideshow Controls"></nav>
-
-    <!-- Auto-hiding Admin Gear Hotspot (Bottom-Right) -->
-    <div class="admin-hotspot" id="admin-hotspot">
-      <a href="admin.html" class="admin-hotspot-link" title="Open Admin Portal (press M)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path
-            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-          </path>
-        </svg>
-      </a>
+  <!-- Top TV Header with Tri-Branding (IEM on left, IEDC in center, UEM on right) -->
+  <header class="tv-header">
+    <!-- Top Left: IEM Logo -->
+    <div class="tv-header-left">
+      <img src="assets/iem_logo.png" alt="IEM - Institute of Engineering &amp; Management" class="branding-logo iem-logo">
     </div>
 
+    <!-- Top Center: IEDC Logo & Exact Department Title -->
+    <div class="tv-header-center">
+      <img src="assets/iedc_logo.png" alt="IEDC - Innovation &amp; Entrepreneurship Development Centre"
+        class="branding-logo iedc-logo">
+      <div class="tv-header-titles">
+        <h1 class="header-main-title">IEDC CSE(AI) / CSE(AI &amp; ML)</h1>
+        <div class="header-sub-title">Innovation &amp; Entrepreneurship Development Centre - Hall of Fame</div>
+      </div>
+    </div>
+
+    <!-- Top Right: Slide Dots, Clock & UEM Logo -->
+    <div class="tv-header-right">
+      <div class="tv-header-meta">
+        <div class="tv-dots-track" id="tv-dots-track" role="tablist" aria-label="Slideshow indicator dots"></div>
+        <div class="tv-clock" id="tv-clock">12:00:00 PM</div>
+      </div>
+      <img src="assets/uem_logo.png" alt="UEM - University of Engineering &amp; Management" class="branding-logo uem-logo">
+    </div>
+  </header>
+
+  <!-- Fullscreen TV Slides Stage -->
+  <main class="tv-stage" id="tv-stage" aria-live="polite">
+    <section class="tv-slide active" id="slide-cover" data-index="0">
+      <div class="tv-cover-slide">
+        <div class="tv-cover-tag stagger-1">Innovation &amp; Entrepreneurship Development Centre • IEM Kolkata</div>
+        <h1 class="tv-cover-headline stagger-2">IEDC CSE(AI)<br><span class="cover-line-2">CSE(AI &amp; ML)</span></h1>
+        <p class="tv-cover-desc stagger-3">
+          Annual competitive achievements, national hackathon championships, and innovation honors (2023 - 2026).
+        </p>
+
+        <div class="tv-cover-stats stagger-4">
+          <div class="tv-stat-block">
+            <div class="tv-stat-num crimson" data-target="22">0</div>
+            <div class="tv-stat-lbl">Total Recognitions</div>
+          </div>
+          <div class="tv-stat-block">
+            <div class="tv-stat-num" data-target="9">0</div>
+            <div class="tv-stat-lbl">1st / Grand Champions</div>
+          </div>
+          <div class="tv-stat-block">
+            <div class="tv-stat-num" data-target="4">0</div>
+            <div class="tv-stat-lbl">Runners-Up (2nd)</div>
+          </div>
+          <div class="tv-stat-block">
+            <div class="tv-stat-num" data-target="3">0</div>
+            <div class="tv-stat-lbl">3rd Place / Podiums</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Autoplay Timer Progress Line -->
+  <div class="tv-progress-line">
+    <div class="tv-progress-bar" id="tv-progress-bar"></div>
+  </div>
+
+  <!-- Discreet Admin Link for remote maintenance (bottom-right corner) -->
+  <div class="tv-admin-corner">
+    <a href="admin.html" class="tv-admin-link" title="Open Admin Management Portal (or press M)">
+      <svg class="admin-gear-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+      Admin
+    </a>
   </div>
 
   <!-- Scripts -->
