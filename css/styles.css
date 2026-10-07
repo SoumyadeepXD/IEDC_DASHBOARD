@@ -972,10 +972,26 @@ body.show-controls .admin-hotspot {
 }
 
 .tv-header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 16px;
-  text-align: left;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.iedc-full-form {
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 0.85vw, 1.05rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #0f172a !important;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .branding-logo {
@@ -996,7 +1012,7 @@ body.show-controls .admin-hotspot {
 
 .tv-header-titles {
   display: flex;
-  flex-direction: column;
+  align-items: center;
 }
 
 .header-main-title {
@@ -1006,22 +1022,22 @@ body.show-controls .admin-hotspot {
   color: #0f172a !important;
   line-height: 1.1;
   text-shadow: none;
+  white-space: nowrap;
 }
 
 .header-sub-title {
-  font-size: clamp(0.75rem, 0.9vw, 1.1rem);
-  font-weight: 600;
-  color: #475569 !important;
+  display: none;
 }
 
 .tv-header-meta {
   display: flex;
   align-items: center;
   gap: 18px;
-  background: #f1f5f9;
-  padding: 6px 16px;
-  border-radius: 24px;
-  border: 1px solid #cbd5e1;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .tv-dots-track {

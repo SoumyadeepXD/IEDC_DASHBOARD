@@ -224,9 +224,7 @@ class KeynoteDisplayEngine {
       <section class="tv-slide ${idx === this.currentSlideIndex ? 'active' : ''}" id="slide-cover" data-index="${idx}">
         <div class="tv-cover-slide">
           <div class="tv-cover-tag stagger-1">Innovation &amp; Entrepreneurship Development Centre • IEM Kolkata</div>
-          <h1 class="tv-cover-headline stagger-2">
-            IEDC CSE(AI)<br><span class="cover-line-2">CSE(AI &amp; ML)</span>
-          </h1>
+          <h1 class="tv-cover-headline stagger-2">IEDC CSE(AI) / CSE(AI &amp; ML)</h1>
           <p class="tv-cover-desc stagger-3">
             Annual competitive achievements, national hackathon championships, and innovation honors (2023 - 2026).
           </p>
